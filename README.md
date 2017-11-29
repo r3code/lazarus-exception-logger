@@ -51,6 +51,7 @@ Put component TExceptionLogger (tab Samples) to your form and set properties you
 ### TExceptionLogger Properties 
 
 **LogFileName** - filename where to write report to.
+
 **MaxCallStackDepth** - maximum count of lines listed in the report, default 20.
 
 ## Demo 
