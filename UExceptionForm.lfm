@@ -10,7 +10,7 @@ object ExceptionForm: TExceptionForm
   OnDestroy = FormDestroy
   OnShow = FormShow
   Position = poScreenCenter
-  LCLVersion = '1.2.0.2'
+  LCLVersion = '1.6.4.0'
   object PanelBasic: TPanel
     Left = 0
     Height = 80
@@ -184,6 +184,7 @@ object ExceptionForm: TExceptionForm
           Anchors = []
           BorderSpacing.Around = 3
           ReadOnly = True
+          ScrollBars = ssAutoBoth
           TabOrder = 0
           WordWrap = False
         end

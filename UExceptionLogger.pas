@@ -5,7 +5,6 @@ unit UExceptionLogger;
 interface
 
 uses
-  {$ifdef windows}Windows,{$endif}
   Classes, SysUtils, UStackTrace, CustomLineInfo, Forms
   // http://wiki.lazarus.freepascal.org/Show_Application_Title,_Version,_and_Company
   // FPC 3.0 fileinfo reads exe resources as long as you register the appropriate units
@@ -28,8 +27,13 @@ type
 
   TExceptionLogger = class(TComponent)
   private
+    FExtraInfo: TStringList;
     FMaxCallStackDepth: Integer;
     FLogFileName: string;
+    FIgnoreList: TStringList;
+    FStackTrace: TStackTrace;
+    FLastException: Exception;
+    FExceptionSender: TObject;
     FOnThreadSynchronize: TThreadSynchronizeEvent;
     procedure ThreadSynchronize(AObject: TObject; Method: TThreadMethod);
     function GetAppVersion: string;
@@ -37,10 +41,6 @@ type
     procedure MakeReport;
     procedure ShowForm;
   public
-    StackTrace: TStackTrace;
-    LastException: Exception;
-    ExceptionSender: TObject;
-    IgnoreList: TStringList;
     procedure LoadDetails;
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -49,6 +49,7 @@ type
     procedure LogToFile(Report: TStringList);
     procedure LogStackTraceToFile(AStackTrace: TStackTrace);
     procedure ShowReportForm;
+    procedure AddExtraInfo(const AFieldName, AValue: string);
   published
     property LogFileName: string read FLogFileName write FLogFileName;
     property MaxCallStackDepth: Integer read FMaxCallStackDepth write SetMaxCallStackDepth;
@@ -86,7 +87,7 @@ resourcestring
 implementation
 
 uses
-  UExceptionForm;
+  UExceptionForm, VersionSupport;
 
 procedure Register;
 begin
@@ -98,8 +99,9 @@ end;
 constructor TExceptionLogger.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
-  IgnoreList := TStringList.Create;
-  StackTrace := TStackTrace.Create;
+  FIgnoreList := TStringList.Create;
+  FStackTrace := TStackTrace.Create;
+  FExtraInfo := TStringList.Create;
   MaxCallStackDepth := 20;
   Application.OnException := @ExceptionHandler;
   Application.Flags := Application.Flags - [AppNoExceptionMessages];
@@ -108,30 +110,48 @@ end;
 
 destructor TExceptionLogger.Destroy;
 begin
-  StackTrace.Free;
-  IgnoreList.Free;
+  FExtraInfo.Free;
+  FStackTrace.Free;
+  FIgnoreList.Free;
   inherited Destroy;
 end;
 
 procedure TExceptionLogger.CreateTextReport(Output: TStringList);
-  function SubFormatLine(const ATitle, AValue: string): string;
+  procedure SubAddLine(const ATitle, AValue: string);
   begin
-    Result := Format('%-19s: %s', [ATitle, AValue]);
+    Output.Add(Format('%-19s: %s', [ATitle, AValue]));
+  end;
+  procedure SubAddExtraInfo;
+  var
+    i: integer;
+  begin
+    for i := 0 to FExtraInfo.Count - 1 do
+    begin
+      SubAddLine(FExtraInfo.Names[i], FExtraInfo.ValueFromIndex[i]);
+    end;
   end;
 begin
-  with Output do begin
-    Clear;
-    Add(SubFormatLine(SReportTime,FormatDateTime('yyyy-mm-dd hh:nn:ss.zzz', Now)));
-    Add(SubFormatLine(SProcessID,IntToStr(GetProcessID)));
-    {$IFNDEF DARWIN}
-    Add(SubFormatLine(SThreadID,IntToStr(GetThreadID)));
-    {$ENDIF}
-    Add(SubFormatLine(SExeName, ExtractFileName(Application.ExeName)));
-    Add(SubFormatLine(SApplicationTitle, Application.Title));
-    Add(SubFormatLine(SVersion, GetAppVersion));
-    Add(SubFormatLine(SExceptionClass, LastException.ClassName));
-    Add(SubFormatLine(SExceptionMessage, LastException.Message));
-  end;
+  Output.Clear;
+  SubAddLine(SReportTime,FormatDateTime('yyyy-mm-dd hh:nn:ss.zzz', Now));
+  // Process Info
+  SubAddLine(SProcessID,IntToStr(GetProcessID));
+  {$IFNDEF DARWIN}
+  SubAddLine(SThreadID,IntToStr(GetThreadID));
+  {$ENDIF}
+  // App Info
+  SubAddLine(SExeName, ExtractFileName(Application.ExeName));
+  SubAddLine(SApplicationTitle, Application.Title);
+  SubAddLine(SVersion, GetAppVersion);
+  // Compile time info
+  SubAddLine('Compiled date', VersionSupport.GetCompiledDate);
+  SubAddLine('Build target', VersionSupport.GetTargetInfo);
+  SubAddLine('LCL version', VersionSupport.GetLCLVersion);
+  SubAddLine('Widget set', VersionSupport.GetWidgetSet);
+  // Exception Info
+  SubAddLine(SExceptionClass, FLastException.ClassName);
+  SubAddLine(SExceptionMessage, FLastException.Message);
+  // Custom Extra Info
+  SubAddExtraInfo;
 end;
 
 procedure TExceptionLogger.LogToFile(Report: TStringList);
@@ -180,16 +200,21 @@ end;
 
 procedure TExceptionLogger.ShowReportForm;
 begin
-  ExceptionForm.LoadStackTraceToListView(StackTrace);
+  ExceptionForm.LoadStackTraceToListView(FStackTrace);
   if not ExceptionForm.Visible then ExceptionForm.ShowModal;
+end;
+
+procedure TExceptionLogger.AddExtraInfo(const AFieldName, AValue: string);
+begin
+  FExtraInfo.Add(Format('%s=%s', [AFieldName, AValue]));
 end;
 
 procedure TExceptionLogger.ExceptionHandler(Sender: TObject; E: Exception);
 begin
   BackTraceStrFunc := @StabBackTraceStr;
-  StackTrace.GetExceptionBackTrace;
-  LastException := E;
-  ExceptionSender := Sender;
+  FStackTrace.GetExceptionBackTrace;
+  FLastException := E;
+  FExceptionSender := Sender;
   if (MainThreadID <> ThreadID) then begin
     if Assigned(FOnThreadSynchronize) then
       FOnThreadSynchronize(Sender, @ShowForm)
@@ -201,14 +226,14 @@ procedure TExceptionLogger.MakeReport;
 var
   Report: TStringList;
 begin
-  StackTrace.GetInfo;
-  if IgnoreList.IndexOf(LastException.ClassName) = -1 then begin
+  FStackTrace.GetInfo;
+  if FIgnoreList.IndexOf(FLastException.ClassName) = -1 then begin
     Report := TStringList.Create;
     try
       CreateTextReport(Report);
       if FLogFileName <> '' then begin
         LogToFile(Report);
-        LogStackTraceToFile(StackTrace);
+        LogStackTraceToFile(FStackTrace);
       end;
       ExceptionForm.MemoExceptionInfo.Lines.Assign(Report);
       ShowReportForm;
@@ -216,29 +241,29 @@ begin
       Report.Free;
     end;
     if ExceptionForm.CheckBoxIgnore.Checked then
-      IgnoreList.Add(LastException.ClassName);
+      FIgnoreList.Add(FLastException.ClassName);
   end;
 end;
 
 procedure TExceptionLogger.ShowForm;
 begin
   ExceptionForm.Logger := Self;
-  ExceptionForm.LabelMessage.Caption := LastException.Message;
+  ExceptionForm.LabelMessage.Caption := FLastException.Message;
   ExceptionForm.MemoExceptionInfo.Clear;
   if not ExceptionForm.Visible then ExceptionForm.ShowModal;
 end;
 
 procedure TExceptionLogger.LoadDetails;
 begin
-  if ExceptionSender is TThread then
-    TThread.Synchronize(TThread(ExceptionSender), @MakeReport)
+  if FExceptionSender is TThread then
+    TThread.Synchronize(TThread(FExceptionSender), @MakeReport)
     else MakeReport;
 end;
 
 procedure TExceptionLogger.SetMaxCallStackDepth(const AValue: Integer);
 begin
   FMaxCallStackDepth := AValue;
-  StackTrace.MaxDepth := AValue;
+  FStackTrace.MaxDepth := AValue;
 end;
 
 procedure TExceptionLogger.ThreadSynchronize(AObject: TObject;

@@ -23,7 +23,11 @@ added to the end of the existing report file.
     Thread ID          : 9076
     Executable         : IncodeUsage.exe
     App. title         : IncodeUsage
-    Version            : 1.1.0.0
+    Version            : 1.1.0.0      
+    Compiled date      : 2017/11/29 at 17:03:30
+    Build target       : i386 - Win32
+    LCL version        : LCL 1.6.4.0
+    Widget set         : Win32/Win64 widget set
     Exception class    : EMyException
     Exception message  : Woo!
     01: 0042471D BUTTON1CLICK in utestincode.pas(35)

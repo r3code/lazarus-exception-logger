@@ -11,6 +11,7 @@ uses
   { you can add units after this };
 
 {$R *.res}
+{$I 'revision.inc'}
 
 var
   exceptionLogger: TExceptionLogger;
@@ -19,6 +20,7 @@ begin
   Application.Initialize;
   exceptionLogger := TExceptionLogger.Create(Application);
   exceptionLogger.LogFileName:= 'bugreport.txt';
+  exceptionLogger.AddExtraInfo('code rev', RevisionStr);
   Application.CreateForm(TfrmTestIncode, frmTestIncode);
   Application.Run;
 end.
