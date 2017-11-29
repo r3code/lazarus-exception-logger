@@ -1,6 +1,10 @@
 # lazarus-exception-logger
 Extended version of ExceptionLogger (https://github.com/beNative/lazarus).
-At the moment of unhanled exception in the application shows basic application information and exception stack trace report. Also the error report can be saved to a file.
+At the moment of unhanled exception in the application shows basic application 
+information and exception stack trace report. 
+
+Also the error report can be saved to a file. New error report record will be 
+added to the end of the existing report file.
 
 **Example of app info**:
 
@@ -14,31 +18,31 @@ At the moment of unhanled exception in the application shows basic application i
     
 **Example of error report file**
 
-    Date/time          : 2017-11-29 15:41:22.904
-    Process ID         : 7056
-    Thread ID          : 12004
+    Date/time          : 2017-11-29 16:23:45.911
+    Process ID         : 12048
+    Thread ID          : 9076
     Executable         : IncodeUsage.exe
-    Application title  : IncodeUsage
+    App. title         : IncodeUsage
     Version            : 1.1.0.0
     Exception class    : EMyException
     Exception message  : Woo!
-    1: 004247AD in BUTTON1CLICK utestincode.pas(35)
-    2: 004F9668 in CLICK ./include/control.inc(2736)
-    3: 0050E43D in CLICK ./include/buttoncontrol.inc(54)
-    4: 0050EA5D in CLICK ./include/buttons.inc(169)
-    5: 0050E36B in WMDEFAULTCLICKED ./include/buttoncontrol.inc(20)
-    6: 0040D058 in  (754)
-    7: 004EF770 in WNDPROC ./include/wincontrol.inc(5384)
-    8: 005385D9 in DELIVERMESSAGE lclmessageglue.pas(112)
-    9: 004CC65F in DOWINDOWPROC ./win32/win32callback.inc(2441)
-    10: 004CCCEB in WINDOWPROC ./win32/win32callback.inc(2604)
-    11: 0053DA17 in CUSTOMFORMWNDPROC ./win32/win32wsforms.pp(382)
-    12: 76CBC4B7 in  (0)
-    13: 76CBC5B7 in  (0)
-    14: 76CB5264 in  (0)
-    15: 76CB5552 in  (0)
-    16: 738445A1 in  (0)
-    17: 73844603 in  (0)
+    01: 0042471D BUTTON1CLICK in utestincode.pas(35)
+    02: 004F9558 CLICK in ./include/control.inc(2736)
+    03: 0050E32D CLICK in ./include/buttoncontrol.inc(54)
+    04: 0050E94D CLICK in ./include/buttons.inc(169)
+    05: 0050E25B WMDEFAULTCLICKED in ./include/buttoncontrol.inc(20)
+    06: 0040CFC8  in (754)
+    07: 004EF660 WNDPROC in ./include/wincontrol.inc(5384)
+    08: 005384C9 DELIVERMESSAGE in lclmessageglue.pas(112)
+    09: 004CC54F DOWINDOWPROC in ./win32/win32callback.inc(2441)
+    10: 004CCBDB WINDOWPROC in ./win32/win32callback.inc(2604)
+    11: 0053D907 CUSTOMFORMWNDPROC in ./win32/win32wsforms.pp(382)
+    12: 76CBC4B7  in (0)
+    13: 76CBC5B7  in (0)
+    14: 76CB5264  in (0)
+    15: 76CB5552  in (0)
+    16: 738445A1  in (0)
+    17: 73844603  in (0)
 
     
 **Example of exception stack trace dialog**:

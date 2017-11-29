@@ -62,7 +62,7 @@ resourcestring
   SExceptionClass = 'Exception class';
   SExceptionMessage = 'Exception message';
   SExeName = 'Executable';
-  SApplicationTitle = 'Application title';
+  SApplicationTitle = 'App. title';
   SReportTime = 'Date/time';
   SProcessID = 'Process ID';
   SThreadID = 'Thread ID';
@@ -164,9 +164,10 @@ begin
   with LogFile do try
     Seek(0, soFromEnd);
     for I := 0 to AStackTrace.Count - 1 do
-    with TStackFrameInfo(AStackTrace[I]) do begin
-      Line := IntToStr(Index) + ': ' + IntToHex(Address, 8) + ' in ' + FunctionName + ' ' +
-        Source + '(' + IntToStr(LineNumber) + ')' + LineEnding;
+    with TStackFrameInfo(AStackTrace[I]) do
+    begin
+      Line := Format('%0.2d: %s %s in %s(%d)' + LineEnding,
+        [Index, IntToHex(Address, 8), FunctionName, Source, LineNumber]);
       if Length(Line) > 0 then
         Write(Line[1], Length(Line));
     end;
