@@ -24,6 +24,22 @@ Download and install lpk file as Lazarus package.
 
 Put component TExceptionLogger (tab Samples) to your form and set properties you want.
 
+Set *Project Options - Debugging* 
+*Checks and assertions*
+ 
+* I/O (-Ci)
+* Range (-Cr)
+* Overflow(-Co)
+* Stack (-Ct)
+* other by your needs.
+
+*Generate debugging info...*: Yes
+
+*Type of debug info*: Stabs (-gs)
+
+*Display line numbers...*: Yes
+
+
 ### Properties 
 
 **LogFileName** - filename where to write report to.
