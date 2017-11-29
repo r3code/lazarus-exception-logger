@@ -18,11 +18,12 @@ see doc/images/error_report.jpg
 
 ## Install 
 
-Download and install lpk file as Lazarus package.
+* Download and install lpk file as Lazarus package.
+* Or copy source file to your project to use it standalone, include the files in a project or set the source path, init it directly in your code.
 
 ## Usage
 
-Put component TExceptionLogger (tab Samples) to your form and set properties you want.
+### Common
 
 Set *Project Options - Debugging* 
 *Checks and assertions*
@@ -39,8 +40,15 @@ Set *Project Options - Debugging*
 
 *Display line numbers...*: Yes
 
+### Standalone usage
 
-### Properties 
+See demo/IncodeUsage.lpr
+
+### As Component
+
+Put component TExceptionLogger (tab Samples) to your form and set properties you want.
+
+### TExceptionLogger Properties 
 
 **LogFileName** - filename where to write report to.
 **MaxCallStackDepth** - maximum count of lines listed in the report, default 20.
