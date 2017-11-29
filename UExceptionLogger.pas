@@ -6,7 +6,20 @@ interface
 
 uses
   {$ifdef windows}Windows,{$endif}
-  Classes, SysUtils, UStackTrace, CustomLineInfo, Forms;
+  Classes, SysUtils, UStackTrace, CustomLineInfo, Forms
+  // http://wiki.lazarus.freepascal.org/Show_Application_Title,_Version,_and_Company
+  // FPC 3.0 fileinfo reads exe resources as long as you register the appropriate units
+  , fileinfo
+  , winpeimagereader {need this for reading exe info}
+  , elfreader {needed for reading ELF executables}
+  , machoreader {needed for reading MACH-O executables}       
+  {$if FPC_FULlVERSION>=30002}
+  {$ifopt D+}
+  , lineinfo
+  {$ENDIF}
+  // enable Debugging - Display line info... (-gl)
+  {$endif}
+  ;
 
 type
   TThreadSynchronizeEvent = procedure (AObject: TObject; Method: TThreadMethod) of object;
@@ -34,7 +47,7 @@ type
     procedure ExceptionHandler(Sender: TObject; E: Exception);
     procedure CreateTextReport(Output: TStringList);
     procedure LogToFile(Report: TStringList);
-    procedure LogStackTraceToFile(StackTrace: TStackTrace);
+    procedure LogStackTraceToFile(AStackTrace: TStackTrace);
     procedure ShowReportForm;
   published
     property LogFileName: string read FLogFileName write FLogFileName;
@@ -46,10 +59,11 @@ type
 procedure Register;
 
 resourcestring
-  SExceptionClass = 'Class';
-  SMessage = 'Message';
-  SApplication = 'Application';
-  STime = 'Time';
+  SExceptionClass = 'Exception class';
+  SExceptionMessage = 'Exception message';
+  SExeName = 'Executable';
+  SApplicationTitle = 'Application title';
+  SReportTime = 'Date/time';
   SProcessID = 'Process ID';
   SThreadID = 'Thread ID';
   SVersion = 'Version';
@@ -87,9 +101,9 @@ begin
   IgnoreList := TStringList.Create;
   StackTrace := TStackTrace.Create;
   MaxCallStackDepth := 20;
-  Application.OnException := ExceptionHandler;
+  Application.OnException := @ExceptionHandler;
   Application.Flags := Application.Flags - [AppNoExceptionMessages];
-  OnThreadSynchronize := ThreadSynchronize;
+  OnThreadSynchronize := @ThreadSynchronize;
 end;
 
 destructor TExceptionLogger.Destroy;
@@ -100,18 +114,23 @@ begin
 end;
 
 procedure TExceptionLogger.CreateTextReport(Output: TStringList);
+  function SubFormatLine(const ATitle, AValue: string): string;
+  begin
+    Result := Format('%-19s: %s', [ATitle, AValue]);
+  end;
 begin
   with Output do begin
     Clear;
-    Add(SExceptionClass + ': ' + LastException.ClassName);
-    Add(SMessage + ': ' + LastException.Message);
-    Add(SApplication + ': ' + Application.Title);
-    Add(SVersion + ': ' + GetAppVersion);
-    Add(STime + ': ' + DateTimeToStr(Now));
-    Add(SProcessID + ': ' + IntToStr(GetProcessID));
+    Add(SubFormatLine(SReportTime,FormatDateTime('yyyy-mm-dd hh:nn:ss.zzz', Now)));
+    Add(SubFormatLine(SProcessID,IntToStr(GetProcessID)));
     {$IFNDEF DARWIN}
-    Add(SThreadID + ': ' + IntToStr(GetThreadID));
+    Add(SubFormatLine(SThreadID,IntToStr(GetThreadID)));
     {$ENDIF}
+    Add(SubFormatLine(SExeName, ExtractFileName(Application.ExeName)));
+    Add(SubFormatLine(SApplicationTitle, Application.Title));
+    Add(SubFormatLine(SVersion, GetAppVersion));
+    Add(SubFormatLine(SExceptionClass, LastException.ClassName));
+    Add(SubFormatLine(SExceptionMessage, LastException.Message));
   end;
 end;
 
@@ -133,7 +152,7 @@ begin
   end;
 end;
 
-procedure TExceptionLogger.LogStackTraceToFile(StackTrace: TStackTrace);
+procedure TExceptionLogger.LogStackTraceToFile(AStackTrace: TStackTrace);
 var
   I: Integer;
   LogFile: TFileStream;
@@ -144,8 +163,8 @@ begin
     else LogFile := TFileStream.Create(UTF8Decode(FLogFileName), fmCreate);
   with LogFile do try
     Seek(0, soFromEnd);
-    for I := 0 to StackTrace.Count - 1 do
-    with TStackFrameInfo(StackTrace[I]) do begin
+    for I := 0 to AStackTrace.Count - 1 do
+    with TStackFrameInfo(AStackTrace[I]) do begin
       Line := IntToStr(Index) + ': ' + IntToHex(Address, 8) + ' in ' + FunctionName + ' ' +
         Source + '(' + IntToStr(LineNumber) + ')' + LineEnding;
       if Length(Line) > 0 then
@@ -172,7 +191,7 @@ begin
   ExceptionSender := Sender;
   if (MainThreadID <> ThreadID) then begin
     if Assigned(FOnThreadSynchronize) then
-      FOnThreadSynchronize(Sender, ShowForm)
+      FOnThreadSynchronize(Sender, @ShowForm)
       else raise Exception.Create(SExceptionHandlerCannotBeSynchronized);
   end else ShowForm;
 end;
@@ -211,7 +230,7 @@ end;
 procedure TExceptionLogger.LoadDetails;
 begin
   if ExceptionSender is TThread then
-    TThread.Synchronize(TThread(ExceptionSender), MakeReport)
+    TThread.Synchronize(TThread(ExceptionSender), @MakeReport)
     else MakeReport;
 end;
 
@@ -230,32 +249,30 @@ end;
 
 function TExceptionLogger.GetAppVersion: string;
 var
-  Size, Size2: DWord;
-  Pt, Pt2: Pointer;
-begin
-  {$ifdef windows}
-  Size := GetFileVersionInfoSize(PChar(ParamStr(0)), Size2);
-  if Size > 0 then
-  begin
-    GetMem(Pt, Size);
-    try
-       GetFileVersionInfo(PChar (ParamStr(0)), 0, Size, Pt);
-       VerQueryValue(Pt, '\', Pt2, Size2);
-       with TVSFixedFileInfo(Pt2^) do
-       begin
-         Result := IntToStr(HiWord(dwFileVersionMS)) + '.' +
-           IntToStr(LoWord(dwFileVersionMS)) + '.' +
-           IntToStr(HiWord(dwFileVersionLS)) + '.' +
-           IntToStr(LoWord(dwFileVersionLS));
-      end;
-    finally
-      FreeMem(Pt);
-    end;
-  end;
-  {$else}
+  FileVerInfo: TFileVersionInfo;
+begin        
   Result := '';
-  {$endif}
-end;
+  FileVerInfo:=TFileVersionInfo.Create(nil);
+  try
+    try
+      FileVerInfo.ReadFileInfo;
+      Result := FileVerInfo.VersionStrings.Values['FileVersion'];
+      Exit;
+    except
+      on E: EResNotFound do
+        Exit;
+    end;
+  finally
+    FileVerInfo.Free;
+  end;
+end;     
+
+initialization
+
+{$IFOPT D+}
+  //disables "optimizations" when converting stack to string (in unit lineinfo)
+  AllowReuseOfLineInfoData:=false;
+{$endif}
 
 end.
 
