@@ -40,6 +40,7 @@ type
     procedure ThreadSynchronize(AObject: TObject; Method: TThreadMethod);
     function GetAppVersion: string;
     function GetProgramUpTime: string;
+    function GetCurrentDiskFreeSpaceSize: string;
     procedure SetMaxCallStackDepth(const AValue: Integer);
     function FormatBasicDataReport(ABasicData: TStringList): TStringList;
     procedure PrepareReport;
@@ -73,6 +74,7 @@ resourcestring
   SReportTime = 'Date/time';
   // Operating system info
   SOperatingSystem = 'Operating system';
+  SCurrentDiskFreeSpaceSize = 'free disk space';
   // Time info
   SProgramUpTime = 'program up time';
   // Process Info
@@ -105,7 +107,10 @@ resourcestring
 implementation
 
 uses
-  UExceptionForm, VersionSupport, usysinfo;
+  UExceptionForm
+  , VersionSupport
+  , usysinfo
+  ;
 
 const
   LOG_LINE_FORMAT = '%0.2d: %s %s in %s(%d)';
@@ -158,6 +163,7 @@ begin
   // OS Info
   SubAddLine(SOperatingSystem, GetOsVersionInfo);
   SubAddLine(SProgramUpTime, GetProgramUpTime);
+  SubAddLine(SCurrentDiskFreeSpaceSize, GetCurrentDiskFreeSpaceSize);
   // Process Info
   SubAddLine(SProcessID,IntToStr(GetProcessID));
   {$IFNDEF DARWIN}
@@ -362,6 +368,14 @@ begin
   Result := Format('%ddays %dhours %dmin %dsec %dms',[days, hours, minutes,
     seconds, ms]);
 end;
+
+function TExceptionLogger.GetCurrentDiskFreeSpaceSize: string;
+const
+  GB = 1024 * 1024 * 1024;
+begin
+  Result := Format('%d GB',[DiskFree(0) div GB]);
+end;
+
 
 initialization
 
