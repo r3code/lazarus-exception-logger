@@ -41,6 +41,7 @@ type
     function GetAppVersion: string;
     function GetProgramUpTime: string;
     function GetCurrentDiskFreeSpaceSize: string;
+    function GetUserName: string;
     procedure SetMaxCallStackDepth(const AValue: Integer);
     function FormatBasicDataReport(ABasicData: TStringList): TStringList;
     procedure PrepareReport;
@@ -74,6 +75,7 @@ resourcestring
   SReportTime = 'Date/time';
   // Operating system info
   SOperatingSystem = 'Operating system';
+  SUserName = 'user name';
   SCurrentDiskFreeSpaceSize = 'free disk space';
   // Time info
   SProgramUpTime = 'program up time';
@@ -110,6 +112,9 @@ uses
   UExceptionForm
   , VersionSupport
   , usysinfo
+  {$IFDEF MSWINDOWS}
+  , LazUTF8
+  {$ENDIF}
   ;
 
 const
@@ -162,6 +167,7 @@ begin
   SubAddLine(SReportTime,FormatDateTime('yyyy-mm-dd hh:nn:ss.zzz', Now));
   // OS Info
   SubAddLine(SOperatingSystem, GetOsVersionInfo);
+  SubAddLine(SUserName, GetUserName);
   SubAddLine(SProgramUpTime, GetProgramUpTime);
   SubAddLine(SCurrentDiskFreeSpaceSize, GetCurrentDiskFreeSpaceSize);
   // Process Info
@@ -374,6 +380,17 @@ const
   GB = 1024 * 1024 * 1024;
 begin
   Result := Format('%d GB',[DiskFree(0) div GB]);
+end;
+
+function TExceptionLogger.GetUserName: string;
+begin
+{$IFDEF MSWINDOWS}
+  { TODO : BUG: Does not work correct for non-latin strings }
+  Result := LazUTF8.GetEnvironmentVariableUTF8('USERNAME') + ' [non-latin symbols]';
+{$ENDIF}
+{$IFDEF UNIX}
+  Result := SysUtils.GetEnvironmentVariable('USER');
+{$ENDIF}
 end;
 
 
