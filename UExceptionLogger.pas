@@ -27,18 +27,22 @@ type
 
   TExceptionLogger = class(TComponent)
   private
+    FStartTime: Int64;
     FExtraInfo: TStringList;
     FMaxCallStackDepth: Integer;
     FLogFileName: string;
     FIgnoreList: TStringList;
+    FBasicData: TStringList;
     FStackTrace: TStackTrace;
     FLastException: Exception;
     FExceptionSender: TObject;
     FOnThreadSynchronize: TThreadSynchronizeEvent;
     procedure ThreadSynchronize(AObject: TObject; Method: TThreadMethod);
     function GetAppVersion: string;
+    function GetProgramUpTime: string;
     procedure SetMaxCallStackDepth(const AValue: Integer);
     function FormatBasicDataReport(ABasicData: TStringList): TStringList;
+    procedure PrepareReport;
     procedure MakeReport;
     procedure ShowForm;
   public
@@ -69,6 +73,8 @@ resourcestring
   SReportTime = 'Date/time';
   // Operating system info
   SOperatingSystem = 'Operating system';
+  // Time info
+  SProgramUpTime = 'program up time';
   // Process Info
   SProcessID = 'Process ID';
   SThreadID = 'Thread ID';
@@ -117,6 +123,7 @@ begin
   FIgnoreList := TStringList.Create;
   FStackTrace := TStackTrace.Create;
   FExtraInfo := TStringList.Create;
+  FStartTime := SysUtils.GetTickCount64;
   MaxCallStackDepth := 20;
   Application.OnException := @ExceptionHandler;
   Application.Flags := Application.Flags - [AppNoExceptionMessages];
@@ -148,7 +155,9 @@ function TExceptionLogger.CollectReportBasicData(): TStringList;
 begin
   Result := TStringList.Create;
   SubAddLine(SReportTime,FormatDateTime('yyyy-mm-dd hh:nn:ss.zzz', Now));
+  // OS Info
   SubAddLine(SOperatingSystem, GetOsVersionInfo);
+  SubAddLine(SProgramUpTime, GetProgramUpTime);
   // Process Info
   SubAddLine(SProcessID,IntToStr(GetProcessID));
   {$IFNDEF DARWIN}
@@ -224,6 +233,7 @@ begin
   FStackTrace.GetExceptionBackTrace;
   FLastException := E;
   FExceptionSender := Sender;
+  PrepareReport;
   if (MainThreadID <> ThreadID) then begin
     if Assigned(FOnThreadSynchronize) then
       FOnThreadSynchronize(Sender, @ShowForm)
@@ -238,8 +248,7 @@ begin
   FStackTrace.GetInfo;
   if FIgnoreList.IndexOf(FLastException.ClassName) <> -1 then
     Exit;
-  basicData := CollectReportBasicData;
-  basicDataReport := FormatBasicDataReport(basicData);
+  basicDataReport := FormatBasicDataReport(FBasicData);
   stackTraces := CollectStackTrace;
   try
     if FLogFileName <> '' then begin
@@ -250,7 +259,6 @@ begin
     ExceptionForm.LoadStackTraceToListView(FStackTrace);
     ShowReportForm;
   finally
-    basicData.Free;
     basicDataReport.Free;
     stackTraces.Free;
   end;
@@ -303,6 +311,11 @@ begin
   end;
 end;
 
+procedure TExceptionLogger.PrepareReport;
+begin
+  FBasicData := CollectReportBasicData;
+end;
+
 procedure TExceptionLogger.ThreadSynchronize(AObject: TObject;
   Method: TThreadMethod);
 begin
@@ -328,7 +341,27 @@ begin
   finally
     FileVerInfo.Free;
   end;
-end;     
+end;
+
+function TExceptionLogger.GetProgramUpTime: string;
+const
+  SECOND = 1000;
+  MINUTE = 60 * SECOND;
+  HOUR = 60 * MINUTE;
+  DAY = 24 * HOUR;
+var
+  delta: Int64;
+  days, hours, minutes, seconds, ms: Integer;
+begin
+  delta := SysUtils.GetTickCount64 - FStartTime;
+  days := delta div DAY;
+  hours := (delta - days*DAY) div HOUR;
+  minutes := (delta - days*DAY - hours * HOUR) div MINUTE;
+  seconds:= (delta - days*DAY - hours * HOUR - minutes*MINUTE) div SECOND;
+  ms := delta - days*DAY - hours * HOUR - minutes*MINUTE - seconds*SECOND;
+  Result := Format('%ddays %dhours %dmin %dsec %dms',[days, hours, minutes,
+    seconds, ms]);
+end;
 
 initialization
 
