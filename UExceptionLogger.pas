@@ -66,6 +66,9 @@ resourcestring
   SExeName = 'Executable';
   SApplicationTitle = 'App. title';
   SReportTime = 'Date/time';
+  // Operating system info
+  SOperatingSystem = 'Operating system';
+  // Process Info
   SProcessID = 'Process ID';
   SThreadID = 'Thread ID';
   SVersion = 'Version';
@@ -95,7 +98,7 @@ resourcestring
 implementation
 
 uses
-  UExceptionForm, VersionSupport;
+  UExceptionForm, VersionSupport, usysinfo;
 
 const
   LOG_LINE_FORMAT = '%0.2d: %s %s in %s(%d)';
@@ -144,6 +147,7 @@ procedure TExceptionLogger.CreateTextReport(Output: TStringList);
 begin
   Output.Clear;
   SubAddLine(SReportTime,FormatDateTime('yyyy-mm-dd hh:nn:ss.zzz', Now));
+  SubAddLine(SOperatingSystem, GetOsVersionInfo);
   // Process Info
   SubAddLine(SProcessID,IntToStr(GetProcessID));
   {$IFNDEF DARWIN}
