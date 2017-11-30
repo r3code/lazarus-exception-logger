@@ -60,6 +60,7 @@ type
 procedure Register;
 
 resourcestring
+  // Log titles
   SExceptionClass = 'Exception class';
   SExceptionMessage = 'Exception message';
   SExeName = 'Executable';
@@ -68,6 +69,12 @@ resourcestring
   SProcessID = 'Process ID';
   SThreadID = 'Thread ID';
   SVersion = 'Version';
+  SCompiledDate = 'Compiled date';
+  SBuildTarget = 'Build target';
+  SLCLVersion = 'LCL version';
+  SWidgetSet = 'Widget set';
+  // Form Titles
+  SExceptionInfo = 'Exception info';
   SCallStack = 'Call stack';
   SGeneral = 'General';
   SErrorOccured = 'Error occured during program execution:';
@@ -75,7 +82,8 @@ resourcestring
   SClose = 'Continue';
   SDetails = 'Details';
   SIgnoreNextTime = 'Next time ignore this exception';
-  SExceptionInfo = 'Exception info';
+
+  // Stack
   SIndex = 'Index';
   SAddress = 'Address';
   SLine = 'Line';
@@ -88,6 +96,9 @@ implementation
 
 uses
   UExceptionForm, VersionSupport;
+
+const
+  LOG_LINE_FORMAT = '%0.2d: %s %s in %s(%d)';
 
 procedure Register;
 begin
@@ -143,10 +154,10 @@ begin
   SubAddLine(SApplicationTitle, Application.Title);
   SubAddLine(SVersion, GetAppVersion);
   // Compile time info
-  SubAddLine('Compiled date', VersionSupport.GetCompiledDate);
-  SubAddLine('Build target', VersionSupport.GetTargetInfo);
-  SubAddLine('LCL version', VersionSupport.GetLCLVersion);
-  SubAddLine('Widget set', VersionSupport.GetWidgetSet);
+  SubAddLine(SCompiledDate, VersionSupport.GetCompiledDate);
+  SubAddLine(SBuildTarget, VersionSupport.GetTargetInfo);
+  SubAddLine(SLCLVersion, VersionSupport.GetLCLVersion);
+  SubAddLine(SWidgetSet, VersionSupport.GetWidgetSet);
   // Exception Info
   SubAddLine(SExceptionClass, FLastException.ClassName);
   SubAddLine(SExceptionMessage, FLastException.Message);
@@ -186,7 +197,7 @@ begin
     for I := 0 to AStackTrace.Count - 1 do
     with TStackFrameInfo(AStackTrace[I]) do
     begin
-      Line := Format('%0.2d: %s %s in %s(%d)' + LineEnding,
+      Line := Format(LOG_LINE_FORMAT + LineEnding,
         [Index, IntToHex(Address, 8), FunctionName, Source, LineNumber]);
       if Length(Line) > 0 then
         Write(Line[1], Length(Line));
