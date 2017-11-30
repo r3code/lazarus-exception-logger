@@ -38,6 +38,7 @@ type
     procedure ThreadSynchronize(AObject: TObject; Method: TThreadMethod);
     function GetAppVersion: string;
     procedure SetMaxCallStackDepth(const AValue: Integer);
+    function FormatBasicDataReport(ABasicData: TStringList): TStringList;
     procedure MakeReport;
     procedure ShowForm;
   public
@@ -45,9 +46,9 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     procedure ExceptionHandler(Sender: TObject; E: Exception);
-    procedure CreateTextReport(Output: TStringList);
-    procedure LogToFile(Report: TStringList);
-    procedure LogStackTraceToFile(AStackTrace: TStackTrace);
+    function CollectReportBasicData: TStringList;
+    function CollectStackTrace: TStringList;
+    procedure LogToFile(ADataList: TStringList);
     procedure ShowReportForm;
     procedure AddExtraInfo(const AFieldName, AValue: string);
   published
@@ -130,10 +131,10 @@ begin
   inherited Destroy;
 end;
 
-procedure TExceptionLogger.CreateTextReport(Output: TStringList);
-  procedure SubAddLine(const ATitle, AValue: string);
+function TExceptionLogger.CollectReportBasicData(): TStringList;
+  procedure SubAddLine(const AName, AValue: string);
   begin
-    Output.Add(Format('%-19s: %s', [ATitle, AValue]));
+    Result.Add(Format('%s=%s',[AName, AValue]));
   end;
   procedure SubAddExtraInfo;
   var
@@ -145,7 +146,7 @@ procedure TExceptionLogger.CreateTextReport(Output: TStringList);
     end;
   end;
 begin
-  Output.Clear;
+  Result := TStringList.Create;
   SubAddLine(SReportTime,FormatDateTime('yyyy-mm-dd hh:nn:ss.zzz', Now));
   SubAddLine(SOperatingSystem, GetOsVersionInfo);
   // Process Info
@@ -169,16 +170,35 @@ begin
   SubAddExtraInfo;
 end;
 
-procedure TExceptionLogger.LogToFile(Report: TStringList);
+function TExceptionLogger.CollectStackTrace: TStringList;
+var
+  i: integer;
+  stackFrame: TStackFrameInfo;
+  Line: string;
+begin
+  Result := TStringList.Create;
+  for I := 0 to FStackTrace.Count - 1 do
+  begin
+    stackFrame := TStackFrameInfo(FStackTrace[I]);
+    Line := Format(LOG_LINE_FORMAT,
+      [stackFrame.Index, IntToHex(stackFrame.Address, 8),
+      stackFrame.FunctionName, stackFrame.Source, stackFrame.LineNumber]);
+    Result.Add(Line);
+  end;
+end;
+
+procedure TExceptionLogger.LogToFile(ADataList: TStringList);
 var
   LogFile: TFileStream;
   Buffer: string;
 begin
-  Buffer := Report.Text;
+  Buffer := ADataList.Text;
+
   if FileExists(FLogFileName) then
     LogFile := TFileStream.Create(UTF8Decode(FLogFileName), fmOpenReadWrite)
     else LogFile := TFileStream.Create(UTF8Decode(FLogFileName), fmCreate);
-  with LogFile do try
+  with LogFile do
+  try
     Seek(0, soFromEnd);
     if Length(Buffer) > 0 then
       Write(Buffer[1], Length(Buffer));
@@ -187,35 +207,9 @@ begin
   end;
 end;
 
-procedure TExceptionLogger.LogStackTraceToFile(AStackTrace: TStackTrace);
-var
-  I: Integer;
-  LogFile: TFileStream;
-  Line: string;
-begin
-  if FileExists(FLogFileName) then
-    LogFile := TFileStream.Create(UTF8Decode(FLogFileName), fmOpenReadWrite)
-    else LogFile := TFileStream.Create(UTF8Decode(FLogFileName), fmCreate);
-  with LogFile do try
-    Seek(0, soFromEnd);
-    for I := 0 to AStackTrace.Count - 1 do
-    with TStackFrameInfo(AStackTrace[I]) do
-    begin
-      Line := Format(LOG_LINE_FORMAT + LineEnding,
-        [Index, IntToHex(Address, 8), FunctionName, Source, LineNumber]);
-      if Length(Line) > 0 then
-        Write(Line[1], Length(Line));
-    end;
-    Line := LineEnding;
-    Write(Line[1], Length(Line));
-  finally
-    LogFile.Free;
-  end;
-end;
 
 procedure TExceptionLogger.ShowReportForm;
 begin
-  ExceptionForm.LoadStackTraceToListView(FStackTrace);
   if not ExceptionForm.Visible then ExceptionForm.ShowModal;
 end;
 
@@ -239,25 +233,29 @@ end;
 
 procedure TExceptionLogger.MakeReport;
 var
-  Report: TStringList;
+  basicData, basicDataReport, stackTraces: TStringList;
 begin
   FStackTrace.GetInfo;
-  if FIgnoreList.IndexOf(FLastException.ClassName) = -1 then begin
-    Report := TStringList.Create;
-    try
-      CreateTextReport(Report);
-      if FLogFileName <> '' then begin
-        LogToFile(Report);
-        LogStackTraceToFile(FStackTrace);
-      end;
-      ExceptionForm.MemoExceptionInfo.Lines.Assign(Report);
-      ShowReportForm;
-    finally
-      Report.Free;
+  if FIgnoreList.IndexOf(FLastException.ClassName) <> -1 then
+    Exit;
+  basicData := CollectReportBasicData;
+  basicDataReport := FormatBasicDataReport(basicData);
+  stackTraces := CollectStackTrace;
+  try
+    if FLogFileName <> '' then begin
+      LogToFile(basicDataReport);
+      LogToFile(stackTraces);
     end;
-    if ExceptionForm.CheckBoxIgnore.Checked then
-      FIgnoreList.Add(FLastException.ClassName);
+    ExceptionForm.SetBasicInfo(basicDataReport);
+    ExceptionForm.LoadStackTraceToListView(FStackTrace);
+    ShowReportForm;
+  finally
+    basicData.Free;
+    basicDataReport.Free;
+    stackTraces.Free;
   end;
+  if ExceptionForm.CheckBoxIgnore.Checked then
+    FIgnoreList.Add(FLastException.ClassName);
 end;
 
 procedure TExceptionLogger.ShowForm;
@@ -279,6 +277,30 @@ procedure TExceptionLogger.SetMaxCallStackDepth(const AValue: Integer);
 begin
   FMaxCallStackDepth := AValue;
   FStackTrace.MaxDepth := AValue;
+end;
+
+function TExceptionLogger.FormatBasicDataReport(ABasicData: TStringList
+  ): TStringList;
+var
+  fieldName, fieldValue: string;
+  i: Integer;
+begin
+  Result := TStringList.Create;
+  if not Assigned(ABasicData) then
+    Exit;
+  if ABasicData.Count = 0 then
+    Exit;
+  for i := 0 to ABasicData.Count - 1 do
+  begin
+    if ABasicData.Names[i] <> EmptyStr then
+    begin
+      fieldName:=ABasicData.Names[i];
+      fieldValue:=ABasicData.ValueFromIndex[i];
+      Result.Add(Format('%-19s: %s', [fieldName, fieldValue]));
+    end
+    else
+      Result.Add(ABasicData[i]);
+  end;
 end;
 
 procedure TExceptionLogger.ThreadSynchronize(AObject: TObject;
