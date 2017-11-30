@@ -37,6 +37,7 @@ type
     procedure Image1Click(Sender: TObject);
   public
     Logger: TExceptionLogger;
+    procedure SetBasicInfo(ADataList: TStringList);
     procedure LoadStackTraceToListView(StackTrace: TStackTrace);
   end;
 
@@ -72,6 +73,11 @@ end;
 procedure TExceptionForm.Image1Click(Sender: TObject);
 begin
 
+end;
+
+procedure TExceptionForm.SetBasicInfo(ADataList: TStringList);
+begin
+  MemoExceptionInfo.Lines.Assign(ADataList);
 end;
 
 procedure TExceptionForm.FormCreate(Sender: TObject);
