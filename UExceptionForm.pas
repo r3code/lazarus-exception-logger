@@ -84,7 +84,10 @@ end;
 
 procedure TExceptionForm.FormCreate(Sender: TObject);
 begin
-
+  {$IFDEF MSWINDOWS}
+  MemoExceptionInfo.Font.Name:='Courier New';
+  MemoExceptionInfo.Font.Size:=12;
+  {$ENDIF}
 end;
 
 procedure TExceptionForm.ButtonCloseClick(Sender: TObject);
