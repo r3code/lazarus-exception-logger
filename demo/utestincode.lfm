@@ -1,7 +1,7 @@
 object frmTestIncode: TfrmTestIncode
-  Left = 328
+  Left = 370
   Height = 240
-  Top = 128
+  Top = 205
   Width = 320
   Caption = 'frmTestIncode'
   ClientHeight = 240
@@ -15,5 +15,14 @@ object frmTestIncode: TfrmTestIncode
     Caption = 'MyException'
     OnClick = Button1Click
     TabOrder = 0
+  end
+  object Button2: TButton
+    Left = 64
+    Height = 65
+    Top = 144
+    Width = 191
+    Caption = 'Thread Exception'
+    OnClick = Button2Click
+    TabOrder = 1
   end
 end

@@ -36,27 +36,28 @@ type
     FStackTrace: TStackTrace;
     FLastException: Exception;
     FExceptionSender: TObject;
+    FLoggerLastError: string;
     FOnThreadSynchronize: TThreadSynchronizeEvent;
     procedure ThreadSynchronize(AObject: TObject; Method: TThreadMethod);
     function GetAppVersion: string;
     function GetProgramUpTime: string;
     function GetCurrentDiskFreeSpaceSize: string;
-    function GetUserName: string;
+    function GetCurrentUserName: string;
     procedure SetMaxCallStackDepth(const AValue: Integer);
     function FormatBasicDataReport(ABasicData: TStringList): TStringList;
     procedure PrepareReport;
-    procedure MakeReport;
     procedure ShowForm;
+    procedure SaveBugReportToFile;
+    procedure CollectReportBasicData(AStore: TStringList);
   public
-    procedure LoadDetails;
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
-    procedure ExceptionHandler(Sender: TObject; E: Exception);
-    function CollectReportBasicData: TStringList;
-    function CollectStackTrace: TStringList;
+    procedure HandleException(Sender: TObject; E: Exception);
+
+    function StackTraceAsStringList: TStringList;
     procedure LogToFile(ADataList: TStringList);
-    procedure ShowReportForm;
     procedure AddExtraInfo(const AFieldName, AValue: string);
+    procedure SkipExceptionNextTime;
   published
     property LogFileName: string read FLogFileName write FLogFileName;
     property MaxCallStackDepth: Integer read FMaxCallStackDepth write SetMaxCallStackDepth;
@@ -106,19 +107,24 @@ resourcestring
   SUnit = 'Unit';
   SExceptionHandlerCannotBeSynchronized = 'Exception handler cannot be synchronized with main thread.';
 
+var
+  exceptionLogger: TExceptionLogger;
+
 implementation
 
 uses
   UExceptionForm
   , VersionSupport
   , usysinfo
-  {$IFDEF MSWINDOWS}
   , LazUTF8
+  {$IFDEF MSWINDOWS}
+  , windows
+  {$ENDIF}
+  {$IFDEF UNIX}
+  , users
   {$ENDIF}
   ;
 
-const
-  LOG_LINE_FORMAT = '%0.2d: %s %s in %s(%d)';
 
 procedure Register;
 begin
@@ -131,27 +137,30 @@ constructor TExceptionLogger.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
   FIgnoreList := TStringList.Create;
+  FBasicData := TStringList.Create;
   FStackTrace := TStackTrace.Create;
   FExtraInfo := TStringList.Create;
   FStartTime := SysUtils.GetTickCount64;
   MaxCallStackDepth := 20;
-  Application.OnException := @ExceptionHandler;
+  Application.OnException := @HandleException;
   Application.Flags := Application.Flags - [AppNoExceptionMessages];
   OnThreadSynchronize := @ThreadSynchronize;
 end;
 
 destructor TExceptionLogger.Destroy;
 begin
-  FExtraInfo.Free;
-  FStackTrace.Free;
-  FIgnoreList.Free;
+  if Assigned(FBasicData) then
+    FreeAndNil(FBasicData);
+  FreeAndNil(FExtraInfo);
+  FreeAndNil(FStackTrace);
+  FreeAndNil(FIgnoreList);
   inherited Destroy;
 end;
 
-function TExceptionLogger.CollectReportBasicData(): TStringList;
+procedure TExceptionLogger.CollectReportBasicData(AStore: TStringList);
   procedure SubAddLine(const AName, AValue: string);
   begin
-    Result.Add(Format('%s=%s',[AName, AValue]));
+    AStore.Add(Format('%s=%s',[AName, AValue]));
   end;
   procedure SubAddExtraInfo;
   var
@@ -163,11 +172,10 @@ function TExceptionLogger.CollectReportBasicData(): TStringList;
     end;
   end;
 begin
-  Result := TStringList.Create;
   SubAddLine(SReportTime,FormatDateTime('yyyy-mm-dd hh:nn:ss.zzz', Now));
   // OS Info
   SubAddLine(SOperatingSystem, GetOsVersionInfo);
-  SubAddLine(SUserName, GetUserName);
+  SubAddLine(SUserName, GetCurrentUserName);
   SubAddLine(SProgramUpTime, GetProgramUpTime);
   SubAddLine(SCurrentDiskFreeSpaceSize, GetCurrentDiskFreeSpaceSize);
   // Process Info
@@ -189,23 +197,41 @@ begin
   SubAddLine(SExceptionMessage, FLastException.Message);
   // Custom Extra Info
   SubAddExtraInfo;
+  AStore.Add(EmptyStr);
 end;
 
-function TExceptionLogger.CollectStackTrace: TStringList;
+function TExceptionLogger.StackTraceAsStringList: TStringList;
+
+const
+  LOG_LINE_FORMAT = ' %s in %s(%d)';
 var
   i: integer;
   stackFrame: TStackFrameInfo;
   Line: string;
+  rowNo, address, method, source, lineNo: string;
 begin
   Result := TStringList.Create;
   for I := 0 to FStackTrace.Count - 1 do
   begin
     stackFrame := TStackFrameInfo(FStackTrace[I]);
-    Line := Format(LOG_LINE_FORMAT,
-      [stackFrame.Index, IntToHex(stackFrame.Address, 8),
-      stackFrame.FunctionName, stackFrame.Source, stackFrame.LineNumber]);
+    method := stackFrame.FunctionName;
+    if stackFrame.FunctionClassName <> EmptyStr then
+      method := stackFrame.FunctionClassName + '.' + stackFrame.FunctionName;
+    source := EmptyStr;
+    if stackFrame.Source <> EmptyStr then
+      source := 'in ' + stackFrame.Source;
+    if stackFrame.LineNumber = 0 then
+      source := EmptyStr;
+    rowNo := Format('%0.2d', [stackFrame.Index]);
+    address := IntToHex(stackFrame.Address, 8);
+    lineNo := EmptyStr;
+    if stackFrame.LineNumber > 0 then
+      lineNo := Format('(%d)', [stackFrame.LineNumber]);
+    Line := Format('%s: %s   %s %s %s',[rowNo, address, method, source, lineNo]);
     Result.Add(Line);
   end;
+  Result.Add(EmptyStr);
+  Result.Add(EmptyStr);
 end;
 
 procedure TExceptionLogger.LogToFile(ADataList: TStringList);
@@ -228,40 +254,79 @@ begin
   end;
 end;
 
-
-procedure TExceptionLogger.ShowReportForm;
-begin
-  if not ExceptionForm.Visible then ExceptionForm.ShowModal;
-end;
-
 procedure TExceptionLogger.AddExtraInfo(const AFieldName, AValue: string);
 begin
   FExtraInfo.Add(Format('%s=%s', [AFieldName, AValue]));
 end;
 
-procedure TExceptionLogger.ExceptionHandler(Sender: TObject; E: Exception);
+procedure TExceptionLogger.SkipExceptionNextTime;
+begin
+  if not Assigned(FLastException) then
+    Exit;
+  FIgnoreList.Add(FLastException.ClassName);
+end;
+
+procedure TExceptionLogger.HandleException(Sender: TObject; E: Exception);
 begin
   BackTraceStrFunc := @StabBackTraceStr;
   FStackTrace.GetExceptionBackTrace;
   FLastException := E;
   FExceptionSender := Sender;
-  PrepareReport;
-  if (MainThreadID <> ThreadID) then begin
+  if (MainThreadID <> ThreadID) then
+  begin
     if Assigned(FOnThreadSynchronize) then
       FOnThreadSynchronize(Sender, @ShowForm)
-      else raise Exception.Create(SExceptionHandlerCannotBeSynchronized);
-  end else ShowForm;
+    else
+      raise Exception.Create(SExceptionHandlerCannotBeSynchronized);
+  end
+  else
+    ShowForm;
 end;
 
-procedure TExceptionLogger.MakeReport;
-var
-  basicData, basicDataReport, stackTraces: TStringList;
+procedure TExceptionLogger.PrepareReport;
 begin
+  CollectReportBasicData(FBasicData);
   FStackTrace.GetInfo;
+end;
+
+procedure TExceptionLogger.ShowForm;
+var
+  biFormatted: TStringList;
+begin
   if FIgnoreList.IndexOf(FLastException.ClassName) <> -1 then
     Exit;
+
+  if FExceptionSender is TThread then
+    TThread.Synchronize(TThread(FExceptionSender), @PrepareReport)
+  else
+    PrepareReport;
+
+  SaveBugReportToFile;
+
+  with TExceptionForm.Create(Application) do
+  try
+    Logger := Self;
+    try
+      biFormatted := FormatBasicDataReport(FBasicData);
+      SetBasicInfo(biFormatted);
+    finally
+      biFormatted.free;
+    end;
+    LoadStackTraceToListView(FStackTrace);
+    SetLoggerError(FLoggerLastError);
+    lblErrorText.Caption := FLastException.Message;
+    ShowModal;
+  finally
+    Free;
+  end;;
+end;
+
+procedure TExceptionLogger.SaveBugReportToFile;
+var
+  basicDataReport, stackTraces: TStringList;
+begin
   basicDataReport := FormatBasicDataReport(FBasicData);
-  stackTraces := CollectStackTrace;
+  stackTraces := StackTraceAsStringList;
   try
     if FLogFileName <> EmptyStr then
     try
@@ -269,33 +334,13 @@ begin
       LogToFile(stackTraces);
     except
       on E: Exception do
-         ExceptionForm.SetLoggerError('Report file not created.'
-         + ' ' + E.Message);
+         FLoggerLastError := 'Report file not created.'
+         + ' ' + E.Message;
     end;
-    ExceptionForm.SetBasicInfo(basicDataReport);
-    ExceptionForm.LoadStackTraceToListView(FStackTrace);
-    ShowReportForm;
   finally
     basicDataReport.Free;
     stackTraces.Free;
   end;
-  if ExceptionForm.CheckBoxIgnore.Checked then
-    FIgnoreList.Add(FLastException.ClassName);
-end;
-
-procedure TExceptionLogger.ShowForm;
-begin
-  ExceptionForm.Logger := Self;
-  ExceptionForm.lblErrorText.Caption := FLastException.Message;
-  ExceptionForm.MemoExceptionInfo.Clear;
-  if not ExceptionForm.Visible then ExceptionForm.ShowModal;
-end;
-
-procedure TExceptionLogger.LoadDetails;
-begin
-  if FExceptionSender is TThread then
-    TThread.Synchronize(TThread(FExceptionSender), @MakeReport)
-    else MakeReport;
 end;
 
 procedure TExceptionLogger.SetMaxCallStackDepth(const AValue: Integer);
@@ -328,10 +373,6 @@ begin
   end;
 end;
 
-procedure TExceptionLogger.PrepareReport;
-begin
-  FBasicData := CollectReportBasicData;
-end;
 
 procedure TExceptionLogger.ThreadSynchronize(AObject: TObject;
   Method: TThreadMethod);
@@ -387,31 +428,66 @@ begin
   Result := Format('%d GB',[DiskFree(0) div GB]);
 end;
 
-function TExceptionLogger.GetUserName: string;
+// from http://forum.lazarus.freepascal.org/index.php/topic,23171.msg138057.html#msg138057
+function TExceptionLogger.GetCurrentUserName: string;
+{$IFDEF WINDOWS}
 const
-  envVar: UnicodeString =
-{$IFDEF MSWINDOWS}
-  'USERNAME'
+  MaxLen = 256;
+var
+  Len: DWORD;
+  WS: WideString;
+  Res: windows.BOOL;
 {$ENDIF}
-{$IFDEF UNIX}
-  'USER'
-{$ENDIF};
 begin
-  // USE Unicode String Version only!
-  Result := SysUtils.GetEnvironmentVariable(envVar);
-{$IFDEF MSWINDOWS}
-  Result := LazUTF8.UTF8ToWinCP(Result)
-{$ENDIF}
-  // Possible that UNIX systems has same problem
+  Result := '';
+  {$IFDEF UNIX}
+  {$IF (DEFINED(LINUX)) OR (DEFINED(FREEBSD))}
+   //GetUsername in unit Users, fpgetuid in unit BaseUnix
+  Result := SysToUtf8(GetUserName(fpgetuid));
+  {$ELSE Linux/BSD}
+  Result := GetEnvironmentVariableUtf8('USER');
+  {$ENDIF UNIX}
+  {$ELSE}
+  {$IFDEF WINDOWS}
+  Len := MaxLen;
+  {$IFnDEF WINCE}
+  if Win32MajorVersion <= 4 then
+  begin
+    SetLength(Result,MaxLen);
+    Res := Windows.GetuserName(@Result[1], Len);
+    if Res then
+    begin
+      SetLength(Result,Len-1);
+      Result := SysToUtf8(Result);
+    end
+    else SetLength(Result,0);
+  end
+  else
+  {$ENDIF NOT WINCE}
+  begin
+    SetLength(WS, MaxLen-1);
+    Res := Windows.GetUserNameW(@WS[1], Len);
+    if Res then
+    begin
+      SetLength(WS, Len - 1);
+      Result := Utf16ToUtf8(WS);
+    end
+    else SetLength(Result,0);
+  end;
+  {$ENDIF WINDOWS}
+  {$ENDIF UNIX}
 end;
 
 
 initialization
 
+exceptionLogger := TExceptionLogger.Create(Application);
+
 {$IFOPT D+}
   //disables "optimizations" when converting stack to string (in unit lineinfo)
   AllowReuseOfLineInfoData:=false;
 {$endif}
+
 
 end.
 

@@ -32,6 +32,8 @@ type
     procedure ButtonCloseClick(Sender: TObject);
     procedure ButtonDetailsClick(Sender: TObject);
     procedure ButtonKillClick(Sender: TObject);
+    procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: boolean);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -43,8 +45,6 @@ type
     procedure SetLoggerError(const AMsg: String);
   end;
 
-var
-  ExceptionForm: TExceptionForm;
 
 implementation
 
@@ -86,12 +86,14 @@ procedure TExceptionForm.FormCreate(Sender: TObject);
 begin
   {$IFDEF MSWINDOWS}
   MemoExceptionInfo.Font.Name:='Courier New';
-  MemoExceptionInfo.Font.Size:=12;
+  MemoExceptionInfo.Font.Size:=9;
   {$ENDIF}
 end;
 
 procedure TExceptionForm.ButtonCloseClick(Sender: TObject);
 begin
+  if CheckBoxIgnore.Checked then
+    Logger.SkipExceptionNextTime();
   Close;
 end;
 
@@ -101,13 +103,23 @@ begin
     Height := PanelBasic.Height + PanelButtons.Height + 200
     else Height := PanelBasic.Height + PanelButtons.Height;
   Application.ProcessMessages;
-  if MemoExceptionInfo.Text = '' then Logger.LoadDetails;
 end;
 
 procedure TExceptionForm.ButtonKillClick(Sender: TObject);
 begin
   //Halt;
   Application.Terminate;
+end;
+
+procedure TExceptionForm.FormClose(Sender: TObject;
+  var CloseAction: TCloseAction);
+begin
+  CloseAction:=caFree;
+end;
+
+procedure TExceptionForm.FormCloseQuery(Sender: TObject; var CanClose: boolean);
+begin
+
 end;
 
 procedure TExceptionForm.FormDestroy(Sender: TObject);
@@ -142,17 +154,12 @@ end;
 
 procedure TExceptionForm.SetLoggerError(const AMsg: String);
 begin
+  if AMsg = EmptyStr then
+    Exit;
   lblLoggerInternalError.Caption:=AMsg;
   lblLoggerInternalError.Show;
 end;
 
-initialization
-
-ExceptionForm := TExceptionForm.Create(nil);
-
-finalization
-
-FreeAndNil(ExceptionForm);
 
 end.
 

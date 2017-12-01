@@ -12,8 +12,7 @@ uses
 {$R *.res}
 {$I 'revision.inc'}
 
-var
-  exceptionLogger: TExceptionLogger;
+
 begin
   Application.Title:='IncodeUsage Exaple of ExceptionLogger';
   RequireDerivedFormResource:=True;
