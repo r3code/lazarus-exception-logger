@@ -263,9 +263,14 @@ begin
   basicDataReport := FormatBasicDataReport(FBasicData);
   stackTraces := CollectStackTrace;
   try
-    if FLogFileName <> '' then begin
+    if FLogFileName <> EmptyStr then
+    try
       LogToFile(basicDataReport);
       LogToFile(stackTraces);
+    except
+      on E: Exception do
+         ExceptionForm.SetLoggerError('Report file not created.'
+         + ' ' + E.Message);
     end;
     ExceptionForm.SetBasicInfo(basicDataReport);
     ExceptionForm.LoadStackTraceToListView(FStackTrace);
@@ -281,7 +286,7 @@ end;
 procedure TExceptionLogger.ShowForm;
 begin
   ExceptionForm.Logger := Self;
-  ExceptionForm.LabelMessage.Caption := FLastException.Message;
+  ExceptionForm.lblErrorText.Caption := FLastException.Message;
   ExceptionForm.MemoExceptionInfo.Clear;
   if not ExceptionForm.Visible then ExceptionForm.ShowModal;
 end;
@@ -383,14 +388,21 @@ begin
 end;
 
 function TExceptionLogger.GetUserName: string;
-begin
+const
+  envVar: UnicodeString =
 {$IFDEF MSWINDOWS}
-  { TODO : BUG: Does not work correct for non-latin strings }
-  Result := LazUTF8.GetEnvironmentVariableUTF8('USERNAME') + ' [non-latin symbols]';
+  'USERNAME'
 {$ENDIF}
 {$IFDEF UNIX}
-  Result := SysUtils.GetEnvironmentVariable('USER');
+  'USER'
+{$ENDIF};
+begin
+  // USE Unicode String Version only!
+  Result := SysUtils.GetEnvironmentVariable(envVar);
+{$IFDEF MSWINDOWS}
+  Result := LazUTF8.UTF8ToWinCP(Result)
 {$ENDIF}
+  // Possible that UNIX systems has same problem
 end;
 
 

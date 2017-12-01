@@ -15,6 +15,7 @@ uses
 var
   exceptionLogger: TExceptionLogger;
 begin
+  Application.Title:='IncodeUsage Exaple of ExceptionLogger';
   RequireDerivedFormResource:=True;
   Application.Initialize;
   exceptionLogger := TExceptionLogger.Create(Application);

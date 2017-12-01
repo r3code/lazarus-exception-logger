@@ -18,8 +18,9 @@ type
     ButtonKill: TButton;
     CheckBoxIgnore: TCheckBox;
     Image1: TImage;
-    Label1: TLabel;
-    LabelMessage: TLabel;
+    lblErrorHeader: TLabel;
+    lblLoggerInternalError: TLabel;
+    lblErrorText: TLabel;
     ListView1: TListView;
     MemoExceptionInfo: TMemo;
     PageControl1: TPageControl;
@@ -39,6 +40,7 @@ type
     Logger: TExceptionLogger;
     procedure SetBasicInfo(ADataList: TStringList);
     procedure LoadStackTraceToListView(StackTrace: TStackTrace);
+    procedure SetLoggerError(const AMsg: String);
   end;
 
 var
@@ -53,7 +55,7 @@ begin
   Caption := SExceptionInfo;
   PageControl1.Pages[0].Caption := SGeneral;
   PageControl1.Pages[1].Caption := SCallStack;
-  Label1.Caption := SErrorOccured;
+  lblErrorHeader.Caption := SErrorOccured;
   ButtonClose.Caption := SClose;
   ButtonDetails.Caption := SDetails;
   ButtonKill.Caption := STerminate;
@@ -133,6 +135,12 @@ begin
   finally
     EndUpdate;
   end;
+end;
+
+procedure TExceptionForm.SetLoggerError(const AMsg: String);
+begin
+  lblLoggerInternalError.Caption:=AMsg;
+  lblLoggerInternalError.Show;
 end;
 
 initialization
