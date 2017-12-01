@@ -18,35 +18,41 @@ added to the end of the existing report file.
     
 **Example of error report file**
 
-    Date/time          : 2017-11-29 16:23:45.911
-    Process ID         : 12048
-    Thread ID          : 9076
+    Date/time          : 2017-12-01 17:53:48.110
+    Operating system   : Windows 7 SP1 i386
+    user name          : ִלטענטי
+    program up time    : 0days 0hours 0min 2sec 356ms
+    free disk space    : 296 GB
+    Process ID         : 15860
+    Thread ID          : 16152
     Executable         : IncodeUsage.exe
-    App. title         : IncodeUsage
-    Version            : 1.1.0.0      
-    Compiled date      : 2017/11/29 at 17:03:30
+    App. title         : IncodeUsage Exaple of ExceptionLogger
+    Version            : 1.1.0.0
+    Compiled date      : 2017/12/01 at 17:52:03
     Build target       : i386 - Win32
     LCL version        : LCL 1.6.4.0
     Widget set         : Win32/Win64 widget set
     Exception class    : EMyException
     Exception message  : Woo!
-    01: 0042471D BUTTON1CLICK in utestincode.pas(35)
-    02: 004F9558 CLICK in ./include/control.inc(2736)
-    03: 0050E32D CLICK in ./include/buttoncontrol.inc(54)
-    04: 0050E94D CLICK in ./include/buttons.inc(169)
-    05: 0050E25B WMDEFAULTCLICKED in ./include/buttoncontrol.inc(20)
-    06: 0040CFC8  in (754)
-    07: 004EF660 WNDPROC in ./include/wincontrol.inc(5384)
-    08: 005384C9 DELIVERMESSAGE in lclmessageglue.pas(112)
-    09: 004CC54F DOWINDOWPROC in ./win32/win32callback.inc(2441)
-    10: 004CCBDB WINDOWPROC in ./win32/win32callback.inc(2604)
-    11: 0053D907 CUSTOMFORMWNDPROC in ./win32/win32wsforms.pp(382)
-    12: 76CBC4B7  in (0)
-    13: 76CBC5B7  in (0)
-    14: 76CB5264  in (0)
-    15: 76CB5552  in (0)
-    16: 738445A1  in (0)
-    17: 73844603  in (0)
+    code revision      : 43594
+
+    01: 00426B2D   TFRMTESTINCODE.BUTTON1CLICK in utestincode.pas (62)
+    02: 004FCB98   TCONTROL.CLICK in ./include/control.inc (2736)
+    03: 0051194D   TBUTTONCONTROL.CLICK in ./include/buttoncontrol.inc (54)
+    04: 00511F6D   TCUSTOMBUTTON.CLICK in ./include/buttons.inc (169)
+    05: 0051187B   TBUTTONCONTROL.WMDEFAULTCLICKED in ./include/buttoncontrol.inc (20)
+    06: 0040D188     (754)
+    07: 004F2CA0   TWINCONTROL.WNDPROC in ./include/wincontrol.inc (5384)
+    08: 0053BAE9   DELIVERMESSAGE in lclmessageglue.pas (112)
+    09: 004CFB8F   TWINDOWPROCHELPER.DOWINDOWPROC in ./win32/win32callback.inc (2441)
+    10: 004D021B   WINDOWPROC in ./win32/win32callback.inc (2604)
+    11: 00540F27   CUSTOMFORMWNDPROC in ./win32/win32wsforms.pp (382)
+    12: 76CBC4B7     
+    13: 76CBC5B7     
+    14: 76CB5264     
+    15: 76CB5552     
+    16: 738445A1     
+    17: 73844603 
 
     
 **Example of exception stack trace dialog**:
