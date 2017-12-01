@@ -95,91 +95,92 @@ begin
 end;
 
 Function UpdateCrc32(InitCrc:cardinal;const InBuf;InLen:LongInt):cardinal;
-  var
-    i : LongInt;
-    p : pchar;
-  begin
-    if Crc32Tbl[1]=0 then
-     MakeCrc32Tbl;
-    p:=@InBuf;
-    Result:=not InitCrc;
-    for i:=1 to InLen do
-     begin
-       UpdateCrc32:=Crc32Tbl[byte(Result) xor byte(p^)] xor (Result shr 8);
-       inc(p);
-     end;
-    Result:=not Result;
-  end;
+var
+  i : LongInt;
+  p : pchar;
+begin
 
-  function CheckDbgFile(var e:TExeFile;const fn:string;dbgcrc:cardinal):boolean;
-  var
-    c      : cardinal;
-    ofm    : word;
-    g      : file;
-  begin
-    CheckDbgFile:=false;
-    assign(g,fn);
-    {$I-}
-     ofm:=filemode;
-     filemode:=$40;
-     reset(g,1);
-     filemode:=ofm;
-    {$I+}
-    if ioresult<>0 then
-     exit;
-    { We reuse the buffer from e here to prevent too much stack allocation }
-    c:=0;
-    repeat
-      blockread(g,e.buf,e.bufsize,e.bufcnt);
-      c:=UpdateCrc32(c,e.buf,e.bufcnt);
-    until e.bufcnt<e.bufsize;
-    close(g);
-    CheckDbgFile:=(dbgcrc=c);
-  end;
+  if Crc32Tbl[1]=0 then
+   MakeCrc32Tbl;
+  p:=@InBuf;
+  Result:=not InitCrc;
+  for i:=1 to InLen do
+   begin
+     UpdateCrc32:=Crc32Tbl[byte(Result) xor byte(p^)] xor (Result shr 8);
+     inc(p);
+   end;
+  Result:=not Result;
+end;
 
-  function ReadDebugLink(var e:TExeFile;var dbgfn:string):boolean;
-  var
-    dbglink : array[0..512] of char;
-    i,
-    dbglinklen,
-    dbglinkofs : longint;
-    dbgcrc     : cardinal;
-  begin
-    ReadDebugLink:=false;
-    if not FindExeSection(e,'.gnu_debuglink',dbglinkofs,dbglinklen) then
+function CheckDbgFile(var e:TExeFile;const fn:string;dbgcrc:cardinal):boolean;
+var
+  c      : cardinal;
+  ofm    : word;
+  g      : file;
+begin
+  CheckDbgFile:=false;
+  assign(g,fn);
+  {$I-}
+   ofm:=filemode;
+   filemode:=$40;
+   reset(g,1);
+   filemode:=ofm;
+  {$I+}
+  if ioresult<>0 then
+   exit;
+  { We reuse the buffer from e here to prevent too much stack allocation }
+  c:=0;
+  repeat
+    blockread(g,e.buf,e.bufsize,e.bufcnt);
+    c:=UpdateCrc32(c,e.buf,e.bufcnt);
+  until e.bufcnt<e.bufsize;
+  close(g);
+  CheckDbgFile:=(dbgcrc=c);
+end;
+
+function ReadDebugLink(var e:TExeFile;var dbgfn:string):boolean;
+var
+  dbglink : array[0..512] of char;
+  i,
+  dbglinklen,
+  dbglinkofs : longint;
+  dbgcrc     : cardinal;
+begin
+  ReadDebugLink:=false;
+  if not FindExeSection(e,'.gnu_debuglink',dbglinkofs,dbglinklen) then
+    exit;
+  if dbglinklen>sizeof(dbglink)-1 then
+    exit;
+  fillchar(dbglink,sizeof(dbglink),0);
+  seek(e.f,dbglinkofs);
+  blockread(e.f,dbglink,dbglinklen);
+  dbgfn:=strpas(dbglink);
+  if length(dbgfn)=0 then
+    exit;
+  i:=align(length(dbgfn)+1,4);
+  if (i+4)>dbglinklen then
+    exit;
+  move(dbglink[i],dbgcrc,4);
+  { current dir }
+  if CheckDbgFile(e,dbgfn,dbgcrc) then
+    begin
+      ReadDebugLink:=true;
       exit;
-    if dbglinklen>sizeof(dbglink)-1 then
-      exit;
-    fillchar(dbglink,sizeof(dbglink),0);
-    seek(e.f,dbglinkofs);
-    blockread(e.f,dbglink,dbglinklen);
-    dbgfn:=strpas(dbglink);
-    if length(dbgfn)=0 then
-      exit;
-    i:=align(length(dbgfn)+1,4);
-    if (i+4)>dbglinklen then
-      exit;
-    move(dbglink[i],dbgcrc,4);
-    { current dir }
-    if CheckDbgFile(e,dbgfn,dbgcrc) then
-      begin
-        ReadDebugLink:=true;
-        exit;
-      end;
-    { executable dir }
-    i:=length(e.filename);
-    while (i>0) and not(e.filename[i] in AllowDirectorySeparators) do
-      dec(i);
-    if i>0 then
-      begin
-        dbgfn:=copy(e.filename,1,i)+dbgfn;
-        if CheckDbgFile(e,dbgfn,dbgcrc) then
-          begin
-            ReadDebugLink:=true;
-            exit;
-          end;
-      end;
-  end;
+    end;
+  { executable dir }
+  i:=length(e.filename);
+  while (i>0) and not(e.filename[i] in AllowDirectorySeparators) do
+    dec(i);
+  if i>0 then
+    begin
+      dbgfn:=copy(e.filename,1,i)+dbgfn;
+      if CheckDbgFile(e,dbgfn,dbgcrc) then
+        begin
+          ReadDebugLink:=true;
+          exit;
+        end;
+    end;
+end;
 
 function OpenStabs(addr : pointer) : boolean;
   var
