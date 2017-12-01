@@ -1,10 +1,11 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <Package Version="4">
     <PathDelim Value="\"/>
     <Name Value="ExceptionLogger"/>
+    <Type Value="RunAndDesignTime"/>
     <AddToProjectUsesSection Value="True"/>
-    <Author Value="Chronos (robie@centrum.cz)"/>
+    <Author Value="r3code (contact@r3code.ru), Chronos (robie@centrum.cz)"/>
     <CompilerOptions>
       <Version Value="11"/>
       <PathDelim Value="\"/>
@@ -16,44 +17,58 @@
           <SyntaxMode Value="Delphi"/>
         </SyntaxOptions>
       </Parsing>
-      <Other>
-        <CompilerMessages>
-          <UseMsgFile Value="True"/>
-        </CompilerMessages>
-        <CompilerPath Value="$(CompPath)"/>
-      </Other>
     </CompilerOptions>
     <Description Value="Component for detailed exception debugging."/>
     <License Value="GNU/GPL"/>
-    <Version Major="1"/>
-    <Files Count="5">
+    <Version Major="1" Minor="1"/>
+    <Files Count="10">
       <Item1>
-        <Filename Value="CustomLineInfo.pas"/>
-        <UnitName Value="CustomLineInfo"/>
-      </Item1>
-      <Item2>
         <Filename Value="UStackTrace.pas"/>
         <UnitName Value="UStackTrace"/>
-      </Item2>
-      <Item3>
+      </Item1>
+      <Item2>
         <Filename Value="UExceptionForm.pas"/>
         <UnitName Value="UExceptionForm"/>
-      </Item3>
-      <Item4>
+      </Item2>
+      <Item3>
         <Filename Value="UExceptionLogger.pas"/>
         <HasRegisterProc Value="True"/>
         <UnitName Value="UExceptionLogger"/>
+      </Item3>
+      <Item4>
+        <Filename Value="dcconvertencoding.inc"/>
+        <Type Value="Include"/>
       </Item4>
       <Item5>
-        <Filename Value="ReadMe.txt"/>
-        <Type Value="Binary"/>
+        <Filename Value="dcconvertencoding.pas"/>
+        <UnitName Value="DCConvertEncoding"/>
       </Item5>
+      <Item6>
+        <Filename Value="dcwindows.pas"/>
+        <UnitName Value="DCWindows"/>
+      </Item6>
+      <Item7>
+        <Filename Value="ExceptionLogger.pas"/>
+        <UnitName Value="ExceptionLogger"/>
+      </Item7>
+      <Item8>
+        <Filename Value="usysinfo.pas"/>
+        <UnitName Value="usysinfo"/>
+      </Item8>
+      <Item9>
+        <Filename Value="versionsupport.pas"/>
+        <UnitName Value="VersionSupport"/>
+      </Item9>
+      <Item10>
+        <Filename Value="CustomLineInfo.pas"/>
+        <UnitName Value="CustomLineInfo"/>
+      </Item10>
     </Files>
     <i18n>
       <EnableI18N Value="True"/>
       <OutDir Value="languages"/>
+      <EnableI18NForLFM Value="True"/>
     </i18n>
-    <Type Value="RunAndDesignTime"/>
     <RequiredPkgs Count="2">
       <Item1>
         <PackageName Value="LCL"/>
