@@ -2,21 +2,21 @@
   This source is only used to compile and install the package.
  }
 
-unit ExceptionLogger; 
+unit ExceptionLogger;
 
 interface
 
 uses
-    CustomLineInfo, UStackTrace, UExceptionForm, UExceptionLogger, 
-  LazarusPackageIntf;
+  UStackTrace, UExceptionForm, UExceptionLogger, DCConvertEncoding, DCWindows, 
+  usysinfo, VersionSupport, CustomLineInfo, LazarusPackageIntf;
 
 implementation
 
-procedure Register; 
+procedure Register;
 begin
-  RegisterUnit('UExceptionLogger', @UExceptionLogger.Register); 
-end; 
+  RegisterUnit('UExceptionLogger', @UExceptionLogger.Register);
+end;
 
 initialization
-  RegisterPackage('ExceptionLogger', @Register); 
+  RegisterPackage('ExceptionLogger', @Register);
 end.
