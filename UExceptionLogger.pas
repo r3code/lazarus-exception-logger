@@ -1,6 +1,6 @@
 unit UExceptionLogger;
 
-{$H+}
+{$mode objfpc}{$H+}
 
 interface
 
