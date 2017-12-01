@@ -41,7 +41,7 @@ type
     function GetAppVersion: string;
     function GetProgramUpTime: string;
     function GetCurrentDiskFreeSpaceSize: string;
-    function GetUserName: string;
+    function GetCurrentUserName: string;
     procedure SetMaxCallStackDepth(const AValue: Integer);
     function FormatBasicDataReport(ABasicData: TStringList): TStringList;
     procedure PrepareReport;
@@ -114,6 +114,7 @@ uses
   , usysinfo
   {$IFDEF MSWINDOWS}
   , LazUTF8
+  , windows
   {$ENDIF}
   ;
 
@@ -167,7 +168,7 @@ begin
   SubAddLine(SReportTime,FormatDateTime('yyyy-mm-dd hh:nn:ss.zzz', Now));
   // OS Info
   SubAddLine(SOperatingSystem, GetOsVersionInfo);
-  SubAddLine(SUserName, GetUserName);
+  SubAddLine(SUserName, GetCurrentUserName);
   SubAddLine(SProgramUpTime, GetProgramUpTime);
   SubAddLine(SCurrentDiskFreeSpaceSize, GetCurrentDiskFreeSpaceSize);
   // Process Info
@@ -387,22 +388,54 @@ begin
   Result := Format('%d GB',[DiskFree(0) div GB]);
 end;
 
-function TExceptionLogger.GetUserName: string;
+// from http://forum.lazarus.freepascal.org/index.php/topic,23171.msg138057.html#msg138057
+function TExceptionLogger.GetCurrentUserName: string;
+{$IFDEF WINDOWS}
 const
-  envVar: UnicodeString =
-{$IFDEF MSWINDOWS}
-  'USERNAME'
+  MaxLen = 256;
+var
+  Len: DWORD;
+  WS: WideString;
+  Res: windows.BOOL;
 {$ENDIF}
-{$IFDEF UNIX}
-  'USER'
-{$ENDIF};
 begin
-  // USE Unicode String Version only!
-  Result := SysUtils.GetEnvironmentVariable(envVar);
-{$IFDEF MSWINDOWS}
-  Result := LazUTF8.UTF8ToWinCP(Result)
-{$ENDIF}
-  // Possible that UNIX systems has same problem
+  Result := '';
+  {$IFDEF UNIX}
+  {$IF (DEFINED(LINUX)) OR (DEFINED(FREEBSD))}
+   //GetUsername in unit Users, fpgetuid in unit BaseUnix
+  Result := SysToUtf8(GetUserName(fpgetuid));
+  {$ELSE Linux/BSD}
+  Result := GetEnvironmentVariableUtf8('USER');
+  {$ENDIF UNIX}
+  {$ELSE}
+  {$IFDEF WINDOWS}
+  Len := MaxLen;
+  {$IFnDEF WINCE}
+  if Win32MajorVersion <= 4 then
+  begin
+    SetLength(Result,MaxLen);
+    Res := Windows.GetuserName(@Result[1], Len);
+    if Res then
+    begin
+      SetLength(Result,Len-1);
+      Result := SysToUtf8(Result);
+    end
+    else SetLength(Result,0);
+  end
+  else
+  {$ENDIF NOT WINCE}
+  begin
+    SetLength(WS, MaxLen-1);
+    Res := Windows.GetUserNameW(@WS[1], Len);
+    if Res then
+    begin
+      SetLength(WS, Len - 1);
+      Result := Utf16ToUtf8(WS);
+    end
+    else SetLength(Result,0);
+  end;
+  {$ENDIF WINDOWS}
+  {$ENDIF UNIX}
 end;
 
 
