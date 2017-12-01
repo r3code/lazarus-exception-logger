@@ -27,7 +27,7 @@ type
 
   TExceptionLogger = class(TComponent)
   private
-    FStartTime: Int64;
+    FStartTime: Cardinal;
     FExtraInfo: TStringList;
     FMaxCallStackDepth: Integer;
     FLogFileName: string;
@@ -201,9 +201,6 @@ begin
 end;
 
 function TExceptionLogger.StackTraceAsStringList: TStringList;
-
-const
-  LOG_LINE_FORMAT = ' %s in %s(%d)';
 var
   i: integer;
   stackFrame: TStackFrameInfo;
@@ -408,8 +405,8 @@ const
   HOUR = 60 * MINUTE;
   DAY = 24 * HOUR;
 var
-  delta: Int64;
-  days, hours, minutes, seconds, ms: Integer;
+  delta: Cardinal;
+  days, hours, minutes, seconds, ms: int64;
 begin
   delta := SysUtils.GetTickCount64 - FStartTime;
   days := delta div DAY;
