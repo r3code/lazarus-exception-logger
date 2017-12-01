@@ -1,0 +1,127 @@
+msgid ""
+msgstr "Content-Type: text/plain; charset=UTF-8"
+
+#: uexceptionlogger.saddress
+msgid "Address"
+msgstr ""
+
+#: uexceptionlogger.sapplicationtitle
+msgid "App. title"
+msgstr ""
+
+#: uexceptionlogger.sbuildtarget
+msgid "Build target"
+msgstr ""
+
+#: uexceptionlogger.scallstack
+msgid "Call stack"
+msgstr ""
+
+#: uexceptionlogger.sclass
+msgid "Class"
+msgstr ""
+
+#: uexceptionlogger.sclose
+msgid "Continue"
+msgstr ""
+
+#: uexceptionlogger.scompileddate
+msgid "Compiled date"
+msgstr ""
+
+#: uexceptionlogger.scurrentdiskfreespacesize
+msgid "free disk space"
+msgstr ""
+
+#: uexceptionlogger.sdetails
+msgid "Details"
+msgstr ""
+
+#: uexceptionlogger.serroroccured
+msgid "Error occured during program execution:"
+msgstr ""
+
+#: uexceptionlogger.sexceptionclass
+msgid "Exception class"
+msgstr ""
+
+#: uexceptionlogger.sexceptionhandlercannotbesynchronized
+msgid "Exception handler cannot be synchronized with main thread."
+msgstr ""
+
+#: uexceptionlogger.sexceptioninfo
+msgid "Exception info"
+msgstr ""
+
+#: uexceptionlogger.sexceptionmessage
+msgid "Exception message"
+msgstr ""
+
+#: uexceptionlogger.sexename
+msgid "Executable"
+msgstr ""
+
+#: uexceptionlogger.sgeneral
+msgid "General"
+msgstr ""
+
+#: uexceptionlogger.signorenexttime
+msgid "Next time ignore this exception"
+msgstr ""
+
+#: uexceptionlogger.sindex
+msgid "Index"
+msgstr ""
+
+#: uexceptionlogger.slclversion
+msgid "LCL version"
+msgstr ""
+
+#: uexceptionlogger.sline
+msgid "Line"
+msgstr ""
+
+#: uexceptionlogger.soperatingsystem
+msgid "Operating system"
+msgstr ""
+
+#: uexceptionlogger.sproceduremethod
+msgid "Procedure/method"
+msgstr ""
+
+#: uexceptionlogger.sprocessid
+msgid "Process ID"
+msgstr ""
+
+#: uexceptionlogger.sprogramuptime
+msgid "program up time"
+msgstr ""
+
+#: uexceptionlogger.sreporttime
+msgid "Date/time"
+msgstr ""
+
+#: uexceptionlogger.sterminate
+msgid "Exit program"
+msgstr ""
+
+#: uexceptionlogger.sthreadid
+msgid "Thread ID"
+msgstr ""
+
+#: uexceptionlogger.sunit
+msgid "Unit"
+msgstr ""
+
+#: uexceptionlogger.susername
+msgid "user name"
+msgstr ""
+
+#: uexceptionlogger.sversion
+msgid "Version"
+msgstr ""
+
+#: uexceptionlogger.swidgetset
+msgid "Widget set"
+msgstr ""
+
