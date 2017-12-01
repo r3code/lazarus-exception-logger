@@ -20,7 +20,7 @@ begin
   Application.Initialize;
   exceptionLogger := TExceptionLogger.Create(Application);
   exceptionLogger.LogFileName:= 'bugreport.txt';
-  exceptionLogger.AddExtraInfo('code rev', RevisionStr);
+  exceptionLogger.AddExtraInfo('code revision', RevisionStr);
   Application.CreateForm(TfrmTestIncode, frmTestIncode);
   Application.Run;
 end.
