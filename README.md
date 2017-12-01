@@ -20,7 +20,7 @@ added to the end of the existing report file.
 
     Date/time          : 2017-12-01 17:53:48.110
     Operating system   : Windows 7 SP1 i386
-    user name          : Дмитрий
+    user name          : Р”РјРёС‚СЂРёР№
     program up time    : 0days 0hours 0min 2sec 356ms
     free disk space    : 296 GB
     Process ID         : 15860
