@@ -7,7 +7,6 @@ object ExceptionForm: TExceptionForm
   ClientHeight = 320
   ClientWidth = 480
   OnClose = FormClose
-  OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow

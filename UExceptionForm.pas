@@ -33,7 +33,6 @@ type
     procedure ButtonDetailsClick(Sender: TObject);
     procedure ButtonKillClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
-    procedure FormCloseQuery(Sender: TObject; var CanClose: boolean);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -117,10 +116,6 @@ begin
   CloseAction:=caFree;
 end;
 
-procedure TExceptionForm.FormCloseQuery(Sender: TObject; var CanClose: boolean);
-begin
-
-end;
 
 procedure TExceptionForm.FormDestroy(Sender: TObject);
 begin
