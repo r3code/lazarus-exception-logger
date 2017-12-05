@@ -122,6 +122,7 @@ uses
   {$ENDIF}
   {$IFDEF UNIX}
   , users
+  , BaseUnix
   {$ENDIF}
   ;
 
