@@ -44,6 +44,9 @@ begin
   // Reset to prevent infinite recursion if problems inside the code PM
   Store := BackTraceStrFunc;
   BackTraceStrFunc := @SysBackTraceStr;
+  Line := 0;
+  SourceStr := EmptyStr;
+  Func := EmptyStr;
   Success := GetLineInfo(ptruint(Addr), Func, SourceStr, Line);
   Address := Integer(Addr);
   FunctionName := Func;
