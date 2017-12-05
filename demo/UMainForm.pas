@@ -19,11 +19,11 @@ type
   { TMainForm }
 
   TMainForm = class(TForm)
-    Button1: TButton;
-    Button2: TButton;
+    btnMakeException: TButton;
+    btnMakeThreadException: TButton;
     ExceptionLogger1: TExceptionLogger;
-    procedure Button1Click(Sender: TObject);
-    procedure Button2Click(Sender: TObject);
+    procedure btnMakeExceptionClick(Sender: TObject);
+    procedure btnMakeThreadExceptionClick(Sender: TObject);
   private
     { private declarations }
   public
@@ -44,7 +44,7 @@ begin
 
   except
     on E: Exception do
-      MainForm.ExceptionLogger1.ExceptionHandler(Self, E);
+      MainForm.ExceptionLogger1.HandleException(Self, E);
   end;
 end;
 
@@ -52,12 +52,12 @@ end;
 
 { TMainForm }
 
-procedure TMainForm.Button1Click(Sender: TObject);
+procedure TMainForm.btnMakeExceptionClick(Sender: TObject);
 begin
   raise Exception.Create('Simple exception');
 end;
 
-procedure TMainForm.Button2Click(Sender: TObject);
+procedure TMainForm.btnMakeThreadExceptionClick(Sender: TObject);
 begin
   Thread := TSampleThread.Create(True);
   Thread.FreeOnTerminate := True;

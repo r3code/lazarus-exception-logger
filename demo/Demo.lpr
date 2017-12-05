@@ -7,12 +7,13 @@ uses
   cthreads,
   {$ENDIF} //{$ENDIF}
   Interfaces, // this includes the LCL widgetset
-  Forms, UMainForm, ExceptionLogger
+  Forms, UMainForm
   { you can add units after this };
 
 {$R *.res}
 
 begin
+  Application.Title:='ExceptionLogger Commponent demo';
   Application.Initialize;
   Application.CreateForm(TMainForm, MainForm);
   Application.Run;
