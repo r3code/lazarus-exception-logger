@@ -1,10 +1,13 @@
 # lazarus-exception-logger
+
 Extended version of ExceptionLogger (https://github.com/beNative/lazarus).
 At the moment of unhanled exception in the application shows basic application 
 information and exception stack trace report. 
 
 Also the error report can be saved to a file. New error report record will be 
 added to the end of the existing report file.
+
+Repository: https://github.com/r3code/lazarus-exception-logger
 
 **Example of app info**:
 
