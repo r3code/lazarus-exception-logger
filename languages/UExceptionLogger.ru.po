@@ -3,43 +3,47 @@ msgstr "Content-Type: text/plain; charset=UTF-8"
 
 #: uexceptionlogger.saddress
 msgid "Address"
-msgstr ""
+msgstr "Адрес"
 
 #: uexceptionlogger.sapplicationtitle
 msgid "App. title"
-msgstr ""
+msgstr "Назв. приложения"
 
 #: uexceptionlogger.sbuildtarget
 msgid "Build target"
-msgstr ""
+msgstr "Режим сборки"
 
 #: uexceptionlogger.scallstack
 msgid "Call stack"
-msgstr ""
+msgstr "Стек вызова"
 
 #: uexceptionlogger.sclass
 msgid "Class"
-msgstr ""
+msgstr "Класс"
 
 #: uexceptionlogger.sclose
 msgid "Continue"
-msgstr ""
+msgstr "Продолжить"
 
 #: uexceptionlogger.scompileddate
 msgid "Compiled date"
-msgstr ""
+msgstr "Дата компиляции"
 
 #: uexceptionlogger.scurrentdiskfreespacesize
 msgid "free disk space"
-msgstr ""
+msgstr "своб. на диске"
 
 #: uexceptionlogger.sdetails
 msgid "Details"
-msgstr ""
+msgstr "Подробности"
 
 #: uexceptionlogger.serroroccured
 msgid "Error occured during program execution:"
-msgstr ""
+msgstr "Во время выполнения программы произошла ошибка:"
+
+#: uexceptionlogger.serrorreportfilenotcrearted
+msgid "Report file not created"
+msgstr "Файл отчета не создан"
 
 #: uexceptionlogger.serrorreportfilenotcrearted
 msgid "Report file not created"
@@ -47,85 +51,85 @@ msgstr ""
 
 #: uexceptionlogger.sexceptionclass
 msgid "Exception class"
-msgstr ""
+msgstr "Класс исключ-я"
 
 #: uexceptionlogger.sexceptionhandlercannotbesynchronized
 msgid "Exception handler cannot be synchronized with main thread."
-msgstr ""
+msgstr "Обработчик ошибок не может быть синхронизирован с основным потоком"
 
 #: uexceptionlogger.sexceptioninfo
 msgid "Exception info"
-msgstr ""
+msgstr "Данные ошибки"
 
 #: uexceptionlogger.sexceptionmessage
 msgid "Exception message"
-msgstr ""
+msgstr "Сообщение исключ-я"
 
 #: uexceptionlogger.sexename
 msgid "Executable"
-msgstr ""
+msgstr "Имя файла"
 
 #: uexceptionlogger.sgeneral
 msgid "General"
-msgstr ""
+msgstr "Общее"
 
 #: uexceptionlogger.signorenexttime
 msgid "Skip this exception next"
-msgstr ""
+msgstr "Не замечать далее"
 
 #: uexceptionlogger.sindex
 msgid "Index"
-msgstr ""
+msgstr "№"
 
 #: uexceptionlogger.slclversion
 msgid "LCL version"
-msgstr ""
+msgstr "Версия LCL"
 
 #: uexceptionlogger.sline
 msgid "Line"
-msgstr ""
+msgstr "Строка"
 
 #: uexceptionlogger.soperatingsystem
 msgid "Operating system"
-msgstr ""
+msgstr "Версия ОС"
 
 #: uexceptionlogger.sproceduremethod
 msgid "Procedure/method"
-msgstr ""
+msgstr "Процедура/метод"
 
 #: uexceptionlogger.sprocessid
 msgid "Process ID"
-msgstr ""
+msgstr "Идентиф. процесса"
 
 #: uexceptionlogger.sprogramuptime
 msgid "program up time"
-msgstr ""
+msgstr "время работы прогр."
 
 #: uexceptionlogger.sreporttime
 msgid "Date/time"
-msgstr ""
+msgstr "Дата/время"
 
 #: uexceptionlogger.sterminate
 msgid "Exit program"
-msgstr ""
+msgstr "Завершить"
 
 #: uexceptionlogger.sthreadid
 msgid "Thread ID"
-msgstr ""
+msgstr "Идентиф. потока"
 
 #: uexceptionlogger.sunit
 msgid "Unit"
-msgstr ""
+msgstr "Модуль"
 
 #: uexceptionlogger.susername
 msgid "user name"
-msgstr ""
+msgstr "Имя пользователя"
 
 #: uexceptionlogger.sversion
 msgid "Version"
-msgstr ""
+msgstr "Версия"
 
 #: uexceptionlogger.swidgetset
 msgid "Widget set"
-msgstr ""
+msgstr "Набор виджетов"
 

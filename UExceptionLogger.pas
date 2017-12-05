@@ -91,7 +91,7 @@ resourcestring
   STerminate = 'Exit program';
   SClose = 'Continue';
   SDetails = 'Details';
-  SIgnoreNextTime = 'Next time ignore this exception';
+  SIgnoreNextTime = 'Skip this exception next';
 
   // Stack
   SIndex = 'Index';
