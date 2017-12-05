@@ -21,7 +21,7 @@
     <Description Value="Component for detailed exception debugging."/>
     <License Value="GNU/GPL"/>
     <Version Major="1" Minor="1"/>
-    <Files Count="10">
+    <Files Count="9">
       <Item1>
         <Filename Value="UStackTrace.pas"/>
         <UnitName Value="UStackTrace"/>
@@ -44,25 +44,21 @@
         <UnitName Value="DCConvertEncoding"/>
       </Item5>
       <Item6>
-        <Filename Value="dcwindows.pas"/>
-        <UnitName Value="DCWindows"/>
-      </Item6>
-      <Item7>
         <Filename Value="ExceptionLogger.pas"/>
         <UnitName Value="ExceptionLogger"/>
-      </Item7>
-      <Item8>
+      </Item6>
+      <Item7>
         <Filename Value="usysinfo.pas"/>
         <UnitName Value="usysinfo"/>
-      </Item8>
-      <Item9>
+      </Item7>
+      <Item8>
         <Filename Value="versionsupport.pas"/>
         <UnitName Value="VersionSupport"/>
-      </Item9>
-      <Item10>
+      </Item8>
+      <Item9>
         <Filename Value="CustomLineInfo.pas"/>
         <UnitName Value="CustomLineInfo"/>
-      </Item10>
+      </Item9>
     </Files>
     <i18n>
       <EnableI18N Value="True"/>
