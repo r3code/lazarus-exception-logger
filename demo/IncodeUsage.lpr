@@ -7,7 +7,7 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
-  Forms, uTestIncode, UExceptionLogger, sysutils, usysinfo;
+  Forms, uTestIncode, UExceptionLogger, sysutils, usysinfo, uappinfo;
 
 {$R *.res}
 {$I 'revision.inc'}

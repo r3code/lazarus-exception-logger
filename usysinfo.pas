@@ -5,6 +5,8 @@ unit usysinfo;
 interface
 
 function GetOsVersionInfo: string;
+function GetCurrentDiskFreeSpaceSize: string;
+function GetCurrentUserName: string;
 
 implementation
 
@@ -13,8 +15,10 @@ uses
   , SysUtils
   , strutils
   , DCConvertEncoding
+  , LazUTF8
   {$IF DEFINED(UNIX)}
   , BaseUnix
+  , users
     {$IFDEF DARWIN}
     , MacOSAll
     {$ENDIF}
@@ -35,6 +39,7 @@ uses
   , JwaWinType
   , DCWindows
   {$ENDIF}
+
   ;
 
 {$IF DEFINED(WINDOWS)}
@@ -473,6 +478,63 @@ begin
     Result += ' ' + GetVersionNumber;
   end;
   {$ENDIF}
+end;
+
+function GetCurrentDiskFreeSpaceSize: string;
+const
+  GB = 1024 * 1024 * 1024;
+begin
+  Result := Format('%d GB',[DiskFree(0) div GB]);
+end;
+
+// from http://forum.lazarus.freepascal.org/index.php/topic,23171.msg138057.html#msg138057
+function GetCurrentUserName: string;
+{$IFDEF WINDOWS}
+const
+  MaxLen = 256;
+var
+  Len: DWORD;
+  WS: WideString;
+  Res: windows.BOOL;
+{$ENDIF}
+begin
+  Result := '';
+  {$IFDEF UNIX}
+  {$IF (DEFINED(LINUX)) OR (DEFINED(FREEBSD))}
+   //GetUsername in unit Users, fpgetuid in unit BaseUnix
+  Result := SysToUtf8(GetUserName(fpgetuid));
+  {$ELSE Linux/BSD}
+  Result := GetEnvironmentVariableUtf8('USER');
+  {$ENDIF UNIX}
+  {$ELSE}
+  {$IFDEF WINDOWS}
+  Len := MaxLen;
+  {$IFnDEF WINCE}
+  if Win32MajorVersion <= 4 then
+  begin
+    SetLength(Result,MaxLen);
+    Res := Windows.GetuserName(@Result[1], Len);
+    if Res then
+    begin
+      SetLength(Result,Len-1);
+      Result := SysToUtf8(Result);
+    end
+    else SetLength(Result,0);
+  end
+  else
+  {$ENDIF NOT WINCE}
+  begin
+    SetLength(WS, MaxLen-1);
+    Res := Windows.GetUserNameW(@WS[1], Len);
+    if Res then
+    begin
+      SetLength(WS, Len - 1);
+      Result := Utf16ToUtf8(WS);
+    end
+    else SetLength(Result,0);
+  end;
+  {$ENDIF WINDOWS}
+  {$ENDIF UNIX}
 end;
 
 end.

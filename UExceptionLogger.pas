@@ -5,13 +5,11 @@ unit UExceptionLogger;
 interface
 
 uses
-  Classes, SysUtils, UStackTrace, CustomLineInfo, Forms
-  // http://wiki.lazarus.freepascal.org/Show_Application_Title,_Version,_and_Company
-  // FPC 3.0 fileinfo reads exe resources as long as you register the appropriate units
-  , fileinfo
-  , winpeimagereader {need this for reading exe info}
-  , elfreader {needed for reading ELF executables}
-  , machoreader {needed for reading MACH-O executables}       
+  Classes
+  , SysUtils
+  , UStackTrace
+  , CustomLineInfo
+  , Forms
   {$if FPC_FULlVERSION>=30002}
   {$ifopt D+}
   , lineinfo
@@ -39,10 +37,7 @@ type
     FLoggerLastError: string;
     FOnThreadSynchronize: TThreadSynchronizeEvent;
     procedure ThreadSynchronize(AObject: TObject; Method: TThreadMethod);
-    function GetAppVersion: string;
     function GetProgramUpTime: string;
-    function GetCurrentDiskFreeSpaceSize: string;
-    function GetCurrentUserName: string;
     procedure SetMaxCallStackDepth(const AValue: Integer);
     function FormatBasicDataReport(ABasicData: TStringList): TStringList;
     procedure PrepareReport;
@@ -107,6 +102,8 @@ resourcestring
   SUnit = 'Unit';
   SExceptionHandlerCannotBeSynchronized = 'Exception handler cannot be synchronized with main thread.';
 
+  SErrorReportFileNotCrearted = 'Report file not created';
+
 var
   exceptionLogger: TExceptionLogger;
 
@@ -116,14 +113,7 @@ uses
   UExceptionForm
   , VersionSupport
   , usysinfo
-  , LazUTF8
-  {$IFDEF MSWINDOWS}
-  , windows
-  {$ENDIF}
-  {$IFDEF UNIX}
-  , users
-  , BaseUnix
-  {$ENDIF}
+  , uappinfo
   ;
 
 
@@ -241,7 +231,8 @@ begin
 
   if FileExists(FLogFileName) then
     LogFile := TFileStream.Create(UTF8Decode(FLogFileName), fmOpenReadWrite)
-    else LogFile := TFileStream.Create(UTF8Decode(FLogFileName), fmCreate);
+  else
+    LogFile := TFileStream.Create(UTF8Decode(FLogFileName), fmCreate);
   with LogFile do
   try
     Seek(0, soFromEnd);
@@ -332,8 +323,8 @@ begin
       LogToFile(stackTraces);
     except
       on E: Exception do
-         FLoggerLastError := 'Report file not created.'
-         + ' ' + E.Message;
+         FLoggerLastError := SErrorReportFileNotCrearted
+         + '. ' + E.Message;
     end;
   finally
     basicDataReport.Free;
@@ -379,26 +370,6 @@ begin
     else raise Exception.Create(SExceptionHandlerCannotBeSynchronized);
 end;
 
-function TExceptionLogger.GetAppVersion: string;
-var
-  FileVerInfo: TFileVersionInfo;
-begin        
-  Result := '';
-  FileVerInfo:=TFileVersionInfo.Create(nil);
-  try
-    try
-      FileVerInfo.ReadFileInfo;
-      Result := FileVerInfo.VersionStrings.Values['FileVersion'];
-      Exit;
-    except
-      on E: EResNotFound do
-        Exit;
-    end;
-  finally
-    FileVerInfo.Free;
-  end;
-end;
-
 function TExceptionLogger.GetProgramUpTime: string;
 const
   SECOND = 1000;
@@ -417,63 +388,6 @@ begin
   ms := delta - days*DAY - hours * HOUR - minutes*MINUTE - seconds*SECOND;
   Result := Format('%ddays %dhours %dmin %dsec %dms',[days, hours, minutes,
     seconds, ms]);
-end;
-
-function TExceptionLogger.GetCurrentDiskFreeSpaceSize: string;
-const
-  GB = 1024 * 1024 * 1024;
-begin
-  Result := Format('%d GB',[DiskFree(0) div GB]);
-end;
-
-// from http://forum.lazarus.freepascal.org/index.php/topic,23171.msg138057.html#msg138057
-function TExceptionLogger.GetCurrentUserName: string;
-{$IFDEF WINDOWS}
-const
-  MaxLen = 256;
-var
-  Len: DWORD;
-  WS: WideString;
-  Res: windows.BOOL;
-{$ENDIF}
-begin
-  Result := '';
-  {$IFDEF UNIX}
-  {$IF (DEFINED(LINUX)) OR (DEFINED(FREEBSD))}
-   //GetUsername in unit Users, fpgetuid in unit BaseUnix
-  Result := SysToUtf8(GetUserName(fpgetuid));
-  {$ELSE Linux/BSD}
-  Result := GetEnvironmentVariableUtf8('USER');
-  {$ENDIF UNIX}
-  {$ELSE}
-  {$IFDEF WINDOWS}
-  Len := MaxLen;
-  {$IFnDEF WINCE}
-  if Win32MajorVersion <= 4 then
-  begin
-    SetLength(Result,MaxLen);
-    Res := Windows.GetuserName(@Result[1], Len);
-    if Res then
-    begin
-      SetLength(Result,Len-1);
-      Result := SysToUtf8(Result);
-    end
-    else SetLength(Result,0);
-  end
-  else
-  {$ENDIF NOT WINCE}
-  begin
-    SetLength(WS, MaxLen-1);
-    Res := Windows.GetUserNameW(@WS[1], Len);
-    if Res then
-    begin
-      SetLength(WS, Len - 1);
-      Result := Utf16ToUtf8(WS);
-    end
-    else SetLength(Result,0);
-  end;
-  {$ENDIF WINDOWS}
-  {$ENDIF UNIX}
 end;
 
 
