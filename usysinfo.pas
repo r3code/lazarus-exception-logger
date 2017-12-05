@@ -28,13 +28,16 @@ uses
   {$IFDEF LCLGTK2}
   , gtk2
   {$ENDIF}
-  {$IFDEF MSWINDOWS}
-  , Windows, JwaNative, JwaNtStatus, JwaWinType
+  {$IFDEF WINDOWS}
+  , Windows
+  , JwaNative
+  , JwaNtStatus
+  , JwaWinType
   , DCWindows
   {$ENDIF}
   ;
 
-{$IF DEFINED(MSWINDOWS)}
+{$IF DEFINED(WINDOWS)}
 const
   AccessModes: array[0..2] of DWORD  = (
                 GENERIC_READ,
@@ -78,7 +81,7 @@ const
 
 // from https://sourceforge.net/p/doublecmd/code/HEAD/tree/trunk/src/platform/udcversion.pas
 function mbFileAccess(const FileName: String; Mode: Word): Boolean;
-{$IFDEF MSWINDOWS}
+{$IFDEF WINDOWS}
 const
   AccessMode: array[0..2] of DWORD  = (
                 GENERIC_READ,
@@ -291,7 +294,7 @@ end;
 
 {$ENDIF}
 
-{$IF DEFINED(MSWINDOWS)}
+{$IF DEFINED(WINDOWS)}
 procedure TryGetNativeSystemInfo(var SystemInfo: TSystemInfo);
 type
   TGetNativeSystemInfo = procedure (var lpSystemInfo: TSystemInfo); stdcall;
@@ -318,7 +321,7 @@ end;
 {$ENDIF}
 
 function GetOsVersionInfo: string;
-{$IF DEFINED(MSWINDOWS)}
+{$IF DEFINED(WINDOWS)}
 const
   PROCESSOR_ARCHITECTURE_AMD64 = 9;
 var
@@ -326,7 +329,7 @@ var
   osvi: TOsVersionInfoExW;
 {$ENDIF}
 begin
-  {$IF DEFINED(MSWINDOWS)}
+  {$IF DEFINED(WINDOWS)}
   Result := 'Windows';
 
   ZeroMemory(@osvi, SizeOf(TOsVersionInfoExW));
