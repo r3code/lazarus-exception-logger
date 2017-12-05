@@ -147,6 +147,9 @@ var
   dbgcrc     : cardinal;
 begin
   ReadDebugLink:=false;
+  dbglinkofs := 0;
+  dbglinklen := 0;
+  dbgcrc := 0;
   if not FindExeSection(e,'.gnu_debuglink',dbglinkofs,dbglinklen) then
     exit;
   if dbglinklen>sizeof(dbglink)-1 then
@@ -183,11 +186,11 @@ begin
 end;
 
 function OpenStabs(addr : pointer) : boolean;
-  var
-    baseaddr : pointer;
+var
+  baseaddr : pointer;
 begin
   OpenStabs:=false;
-
+  baseaddr := nil;
   GetModuleByAddr(addr,baseaddr,filename);
 {$ifdef DEBUG_LINEINFO}
   writeln(stderr,filename,' Baseaddr: ',hexstr(ptruint(baseaddr),sizeof(baseaddr)*2));
