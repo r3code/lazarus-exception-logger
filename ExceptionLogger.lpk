@@ -20,7 +20,7 @@
     </CompilerOptions>
     <Description Value="Component for detailed exception debugging."/>
     <License Value="GNU/GPL"/>
-    <Version Major="1" Minor="1"/>
+    <Version Major="1" Minor="2"/>
     <Files Count="9">
       <Item1>
         <Filename Value="UStackTrace.pas"/>
@@ -52,12 +52,12 @@
         <UnitName Value="usysinfo"/>
       </Item7>
       <Item8>
-        <Filename Value="versionsupport.pas"/>
-        <UnitName Value="VersionSupport"/>
-      </Item8>
-      <Item9>
         <Filename Value="CustomLineInfo.pas"/>
         <UnitName Value="CustomLineInfo"/>
+      </Item8>
+      <Item9>
+        <Filename Value="lelversionsupport.pas"/>
+        <UnitName Value="VersionSupport"/>
       </Item9>
     </Files>
     <i18n>

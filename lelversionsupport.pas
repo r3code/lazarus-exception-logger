@@ -1,13 +1,10 @@
-Unit VersionSupport;
+Unit lelVersionSupport;
 
 {$mode objfpc}
 
 Interface
 
 (*
-  This code from http://forum.lazarus.freepascal.org/index.php/topic,13957.0.html
-  For lazarus > 1.7 see http://forum.lazarus.freepascal.org/index.php/topic,13957.msg233094.html#msg233094
-
   Building on the excellent vinfo.pas supplied by Paul Ishenin and available elsewhere on the Lazarus
   Forums
     - I hid the TVersionInfo class from the end user to simplify their (mine) number of required Uses...
@@ -29,11 +26,11 @@ Interface
   //  {$I %FILE%} = Current pas file
   //  {$I %LINE%} = current line number
 
-  UPDATE:  GetCPU added
-
   Mike Thompson - mike.cornflake@gmail.com
-  March 24 2016
+  Origin: July 24 2011
 
+  Changes:
+  January 2017:   Updated code to cope with refactored LCL Platform Definitions
 *)
 
 Uses
@@ -53,34 +50,14 @@ Function GetResourceStrings(oStringList : TStringList) : Boolean;
 Function GetFileVersion: String;
 Function GetProductVersion: String;
 
-Const
-  WIDGETSET_GTK        = 'GTK widget set';
-  WIDGETSET_GTK2       = 'GTK 2 widget set';
-  WIDGETSET_WIN        = 'Win32/Win64 widget set';
-  WIDGETSET_WINCE      = 'WinCE widget set';
-  WIDGETSET_CARBON     = 'Carbon widget set';
-  WIDGETSET_QT         = 'QT widget set';
-  WIDGETSET_fpGUI      = 'fpGUI widget set';
-  WIDGETSET_OTHER      = 'Other gui';
-
 Implementation
 
 Uses
-  resource, versiontypes, versionresource, LCLVersion, InterfaceBase;
+  resource, versiontypes, versionresource, LCLVersion, InterfaceBase, LCLPlatformDef;
 
 Function GetWidgetSet: String;
 Begin
-  Case WidgetSet.LCLPlatform Of
-    lpGtk:   Result := WIDGETSET_GTK;
-    lpGtk2:  Result := WIDGETSET_GTK2;
-    lpWin32: Result := WIDGETSET_WIN;
-    lpWinCE: Result := WIDGETSET_WINCE;
-    lpCarbon:Result := WIDGETSET_CARBON;
-    lpQT:    Result := WIDGETSET_QT;
-    lpfpGUI: Result := WIDGETSET_fpGUI;
-  Else
-    Result:=WIDGETSET_OTHER;
-  End;
+  Result := LCLPlatformDisplayNames[WidgetSet.LCLPlatform];
 End;
 
 Function GetCompilerInfo: String;
@@ -271,3 +248,4 @@ Finalization
   If Assigned(FInfo) Then
     FInfo.Free;
 End.
+

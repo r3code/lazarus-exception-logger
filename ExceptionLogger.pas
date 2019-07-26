@@ -4,11 +4,12 @@
 
 unit ExceptionLogger;
 
+{$warn 5023 off : no warning about unused units}
 interface
 
 uses
   UStackTrace, UExceptionForm, UExceptionLogger, DCConvertEncoding, usysinfo, 
-  VersionSupport, CustomLineInfo, LazarusPackageIntf;
+  CustomLineInfo, lelversionsupport, LazarusPackageIntf;
 
 implementation
 

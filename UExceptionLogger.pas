@@ -111,7 +111,7 @@ implementation
 
 uses
   UExceptionForm
-  , VersionSupport
+  , lelVersionSupport
   , usysinfo
   , uappinfo
   ;
@@ -179,10 +179,10 @@ begin
   SubAddLine(SApplicationTitle, Application.Title);
   SubAddLine(SVersion, GetAppVersion);
   // Compile time info
-  SubAddLine(SCompiledDate, VersionSupport.GetCompiledDate);
-  SubAddLine(SBuildTarget, VersionSupport.GetTargetInfo);
-  SubAddLine(SLCLVersion, VersionSupport.GetLCLVersion);
-  SubAddLine(SWidgetSet, VersionSupport.GetWidgetSet);
+  SubAddLine(SCompiledDate, lelVersionSupport.GetCompiledDate);
+  SubAddLine(SBuildTarget, lelVersionSupport.GetTargetInfo);
+  SubAddLine(SLCLVersion, lelVersionSupport.GetLCLVersion);
+  SubAddLine(SWidgetSet, lelVersionSupport.GetWidgetSet);
   // Exception Info
   SubAddLine(SExceptionClass, FLastException.ClassName);
   SubAddLine(SExceptionMessage, FLastException.Message);
