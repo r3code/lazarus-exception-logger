@@ -19,8 +19,8 @@
    License along with this library; if not, write to the Free Software
    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
 }
-
-unit DCWindows;
+// unit renamed DCWindows to lelDCWindows. Fixes #9 Units conflicting with KASToolbar from OPM
+unit lelDCWindows;
 
 {$mode objfpc}{$H+}
 

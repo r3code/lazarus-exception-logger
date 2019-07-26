@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectOptions>
-    <Version Value="10"/>
+    <Version Value="11"/>
     <PathDelim Value="\"/>
     <General>
       <SessionStorage Value="InProjectDir"/>
@@ -9,7 +9,6 @@
       <Title Value="IncodeUsage Exaple of ExceptionLogger"/>
       <ResourceType Value="res"/>
       <UseXPManifest Value="True"/>
-      <Icon Value="0"/>
     </General>
     <i18n>
       <OutDir Value="..\languages"/>
@@ -19,7 +18,6 @@
       <MajorVersionNr Value="1"/>
       <MinorVersionNr Value="1"/>
       <Language Value="0419"/>
-      <StringTable ProductVersion=""/>
     </VersionInfo>
     <BuildModes Count="1">
       <Item1 Name="Default" Default="True"/>
@@ -28,16 +26,17 @@
       <Version Value="2"/>
     </PublishOptions>
     <RunParams>
-      <local>
-        <FormatVersion Value="1"/>
-      </local>
+      <FormatVersion Value="2"/>
+      <Modes Count="1">
+        <Mode0 Name="default"/>
+      </Modes>
     </RunParams>
     <RequiredPackages Count="1">
       <Item1>
         <PackageName Value="LCL"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="10">
+    <Units Count="8">
       <Unit0>
         <Filename Value="IncodeUsage.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -70,22 +69,13 @@
         <IsPartOfProject Value="True"/>
       </Unit5>
       <Unit6>
-        <Filename Value="..\versionsupport.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="VersionSupport"/>
-      </Unit6>
-      <Unit7>
         <Filename Value="..\usysinfo.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit7>
-      <Unit8>
-        <Filename Value="..\dcconvertencoding.pas"/>
-        <IsPartOfProject Value="True"/>
-      </Unit8>
-      <Unit9>
+      </Unit6>
+      <Unit7>
         <Filename Value="..\uappinfo.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit9>
+      </Unit7>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

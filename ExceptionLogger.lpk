@@ -36,28 +36,28 @@
         <UnitName Value="UExceptionLogger"/>
       </Item3>
       <Item4>
-        <Filename Value="dcconvertencoding.inc"/>
-        <Type Value="Include"/>
-      </Item4>
-      <Item5>
-        <Filename Value="dcconvertencoding.pas"/>
-        <UnitName Value="DCConvertEncoding"/>
-      </Item5>
-      <Item6>
         <Filename Value="ExceptionLogger.pas"/>
         <UnitName Value="ExceptionLogger"/>
-      </Item6>
-      <Item7>
-        <Filename Value="usysinfo.pas"/>
-        <UnitName Value="usysinfo"/>
-      </Item7>
-      <Item8>
+      </Item4>
+      <Item5>
         <Filename Value="CustomLineInfo.pas"/>
         <UnitName Value="CustomLineInfo"/>
+      </Item5>
+      <Item6>
+        <Filename Value="lelversionsupport.pas"/>
+        <UnitName Value="lelVersionSupport"/>
+      </Item6>
+      <Item7>
+        <Filename Value="leldcconvertencoding.inc"/>
+        <Type Value="Include"/>
+      </Item7>
+      <Item8>
+        <Filename Value="leldcconvertencoding.pas"/>
+        <UnitName Value="lelDCConvertEncoding"/>
       </Item8>
       <Item9>
-        <Filename Value="lelversionsupport.pas"/>
-        <UnitName Value="VersionSupport"/>
+        <Filename Value="leldcwindows.pas"/>
+        <UnitName Value="lelDCWindows"/>
       </Item9>
     </Files>
     <i18n>
@@ -80,5 +80,8 @@
     <PublishOptions>
       <Version Value="2"/>
     </PublishOptions>
+    <CustomOptions Items="ExternHelp" Version="2">
+      <_ExternHelp Items="Count"/>
+    </CustomOptions>
   </Package>
 </CONFIG>

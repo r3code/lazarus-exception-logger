@@ -8,8 +8,8 @@ unit ExceptionLogger;
 interface
 
 uses
-  UStackTrace, UExceptionForm, UExceptionLogger, DCConvertEncoding, usysinfo, 
-  CustomLineInfo, lelversionsupport, LazarusPackageIntf;
+  UStackTrace, UExceptionForm, UExceptionLogger, CustomLineInfo, 
+  lelVersionSupport, leldcconvertencoding, leldcwindows, LazarusPackageIntf;
 
 implementation
 

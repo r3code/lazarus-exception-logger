@@ -1,4 +1,5 @@
-unit DCConvertEncoding;
+// unit renamed DCConvertEncoding to lelDCConvertEncoding. Fixes #9 Units conflicting with KASToolbar from OPM
+unit lelDCConvertEncoding;
 
 {$mode objfpc}{$H+}
 
