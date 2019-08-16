@@ -14,7 +14,7 @@ uses
   Classes
   , SysUtils
   , strutils
-  , DCConvertEncoding
+  , lelDCConvertEncoding
   , LazUTF8
   {$IF DEFINED(UNIX)}
   , BaseUnix
@@ -37,7 +37,7 @@ uses
   , JwaNative
   , JwaNtStatus
   , JwaWinType
-  , DCWindows
+  , lelDCWindows
   {$ENDIF}
 
   ;
