@@ -274,6 +274,7 @@ end;
 
 procedure TExceptionLogger.PrepareReport;
 begin
+  FBasicData.Clear;
   CollectReportBasicData(FBasicData);
   FStackTrace.GetInfo;
 end;
