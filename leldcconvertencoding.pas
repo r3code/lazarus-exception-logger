@@ -275,7 +275,7 @@ end;
 
 {$ELSEIF DEFINED(UNIX)}
 
-{$I dcconvertencoding.inc}
+{$I leldcconvertencoding.inc}
 
 const
   EncodingUTF8 = 'UTF-8'; // UTF-8 Encoding
