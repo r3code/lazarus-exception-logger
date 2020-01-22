@@ -9,7 +9,7 @@ interface
 
 uses
   UStackTrace, UExceptionForm, UExceptionLogger, CustomLineInfo, 
-  lelVersionSupport, leldcconvertencoding, leldcwindows, LazarusPackageIntf;
+  LazarusPackageIntf;
 
 implementation
 

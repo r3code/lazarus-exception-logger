@@ -21,7 +21,7 @@
     <Description Value="Component for detailed exception debugging."/>
     <License Value="GNU/GPL"/>
     <Version Major="1" Minor="2"/>
-    <Files Count="9">
+    <Files Count="4">
       <Item1>
         <Filename Value="UStackTrace.pas"/>
         <UnitName Value="UStackTrace"/>
@@ -36,29 +36,9 @@
         <UnitName Value="UExceptionLogger"/>
       </Item3>
       <Item4>
-        <Filename Value="ExceptionLogger.pas"/>
-        <UnitName Value="ExceptionLogger"/>
-      </Item4>
-      <Item5>
         <Filename Value="CustomLineInfo.pas"/>
         <UnitName Value="CustomLineInfo"/>
-      </Item5>
-      <Item6>
-        <Filename Value="lelversionsupport.pas"/>
-        <UnitName Value="lelVersionSupport"/>
-      </Item6>
-      <Item7>
-        <Filename Value="leldcconvertencoding.inc"/>
-        <Type Value="Include"/>
-      </Item7>
-      <Item8>
-        <Filename Value="leldcconvertencoding.pas"/>
-        <UnitName Value="lelDCConvertEncoding"/>
-      </Item8>
-      <Item9>
-        <Filename Value="leldcwindows.pas"/>
-        <UnitName Value="lelDCWindows"/>
-      </Item9>
+      </Item4>
     </Files>
     <i18n>
       <EnableI18N Value="True"/>
