@@ -3,6 +3,8 @@
 language: generic
 sudo: required
 dist: bionic
+services:
+  - xvfb
 
 os:
   - linux
@@ -26,8 +28,7 @@ matrix:
       env: LAZ_VER=2.0.6 LAZ_ENV=qemu-arm LAZ_OPT="--os=linux --cpu=arm"
 
 before_install:
-  # Start virtual display server
-  - Xvfb $DISPLAY &
+  - chmod +x ./.travis.install.py
 
 install:
   # Install prerequisites (fpc/lazarus/wine/qemu)
