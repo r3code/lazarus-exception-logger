@@ -286,29 +286,34 @@ begin
   if FIgnoreList.IndexOf(FLastException.ClassName) <> -1 then
     Exit;
 
-  if FExceptionSender is TThread then
-    TThread.Synchronize(TThread(FExceptionSender), @PrepareReport)
-  else
-    PrepareReport;
-
-  SaveBugReportToFile;
-
-  with TExceptionForm.Create(Application) do
+  Application.DisableIdleHandler;
   try
-    Logger := Self;
+    if FExceptionSender is TThread then
+      TThread.Synchronize(TThread(FExceptionSender), @PrepareReport)
+    else
+      PrepareReport;
+
+    SaveBugReportToFile;
+
+    with TExceptionForm.Create(Application) do
     try
-      biFormatted := FormatBasicDataReport(FBasicData);
-      SetBasicInfo(biFormatted);
+      Logger := Self;
+      try
+        biFormatted := FormatBasicDataReport(FBasicData);
+        SetBasicInfo(biFormatted);
+      finally
+        biFormatted.free;
+      end;
+      LoadStackTraceToListView(FStackTrace);
+      SetLoggerError(FLoggerLastError);
+      lblErrorText.Caption := FLastException.Message;
+      ShowModal;
     finally
-      biFormatted.free;
+      Free;
     end;
-    LoadStackTraceToListView(FStackTrace);
-    SetLoggerError(FLoggerLastError);
-    lblErrorText.Caption := FLastException.Message;
-    ShowModal;
   finally
-    Free;
-  end;;
+    Application.EnableIdleHandler;
+  end;
 end;
 
 procedure TExceptionLogger.SaveBugReportToFile;
