@@ -11,7 +11,7 @@ type
   TStackFrameInfo = class
     Index: Integer;
     LineNumber: Integer;
-    Address: Integer;
+    Address: PtrUInt;
     FunctionClassName: string;
     FunctionName: string;
     Source: string;

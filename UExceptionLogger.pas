@@ -211,7 +211,7 @@ begin
     if stackFrame.LineNumber = 0 then
       source := EmptyStr;
     rowNo := Format('%0.2d', [stackFrame.Index]);
-    address := IntToHex(stackFrame.Address, 8);
+    address := IntToHex(stackFrame.Address, sizeof(PtrUInt)*2);
     lineNo := EmptyStr;
     if stackFrame.LineNumber > 0 then
       lineNo := Format('(%d)', [stackFrame.LineNumber]);
