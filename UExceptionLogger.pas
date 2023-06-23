@@ -8,11 +8,11 @@ uses
   Classes
   , SysUtils
   , UStackTrace
-  , CustomLineInfo
+  ,{$IFDEF CPU64}lnfodwrf{$ELSE}CustomLineInfo{$ENDIF}
   , Forms
   {$if FPC_FULlVERSION>=30002}
   {$ifopt D+}
-  , lineinfo
+  {$IFNDEF CPU64}, lineinfo{$ENDIF}
   {$ENDIF}
   // enable Debugging - Display line info... (-gl)
   {$endif}
@@ -257,7 +257,7 @@ end;
 
 procedure TExceptionLogger.HandleException(Sender: TObject; E: Exception);
 begin
-  BackTraceStrFunc := @StabBackTraceStr;
+  BackTraceStrFunc := {$ifdef CPU64}@DwarfBackTraceStr{$ELSE}@StabBackTraceStr{$ENDIF};
   FStackTrace.GetExceptionBackTrace;
   FLastException := E;
   FExceptionSender := Sender;
