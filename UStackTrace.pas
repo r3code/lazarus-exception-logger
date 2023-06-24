@@ -50,7 +50,7 @@ begin
   SourceStr := EmptyStr;
   Func := EmptyStr;
   Success := GetLineInfo(ptruint(Addr), Func, SourceStr, Line);
-  Address := Integer(Addr);
+  Address := PtrUInt(Addr);
   FunctionName := Func;
   if Pos('__', FunctionName) > 0 then begin
     FunctionClassName := Copy(FunctionName, 1, Pos('__', FunctionName) - 1);
