@@ -2,10 +2,12 @@ unit UStackTrace;
 
 {$mode objfpc}{$H+}
 
+{$I ExceptionLogger.inc}
+
 interface
 
 uses
-  Classes, SysUtils, Contnrs, {$IFDEF CPU64}lnfodwrf{$ELSE}CustomLineInfo{$ENDIF};
+  Classes, SysUtils, Contnrs, {$IFDEF LOG_DWARF}lnfodwrf{$ELSE}CustomLineInfo{$ENDIF};
 
 type
   TStackFrameInfo = class

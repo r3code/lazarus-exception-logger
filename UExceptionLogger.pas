@@ -2,17 +2,19 @@ unit UExceptionLogger;
 
 {$mode objfpc}{$H+}
 
+{$I ExceptionLogger.inc}
+
 interface
 
 uses
   Classes
   , SysUtils
   , UStackTrace
-  ,{$IFDEF CPU64}lnfodwrf{$ELSE}CustomLineInfo{$ENDIF}
+  ,{$IFDEF LOG_DWARF}lnfodwrf{$ELSE}CustomLineInfo{$ENDIF}
   , Forms
   {$if FPC_FULlVERSION>=30002}
   {$ifopt D+}
-  {$IFNDEF CPU64}, lineinfo{$ENDIF}
+  {$IFNDEF LOG_DWARF}, lineinfo{$ENDIF}
   {$ENDIF}
   // enable Debugging - Display line info... (-gl)
   {$endif}
@@ -257,7 +259,7 @@ end;
 
 procedure TExceptionLogger.HandleException(Sender: TObject; E: Exception);
 begin
-  BackTraceStrFunc := {$ifdef CPU64}@DwarfBackTraceStr{$ELSE}@StabBackTraceStr{$ENDIF};
+  BackTraceStrFunc := {$ifdef LOG_DWARF}@DwarfBackTraceStr{$ELSE}@StabBackTraceStr{$ENDIF};
   FStackTrace.GetExceptionBackTrace;
   FLastException := E;
   FExceptionSender := Sender;
