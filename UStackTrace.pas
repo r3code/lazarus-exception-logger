@@ -2,16 +2,18 @@ unit UStackTrace;
 
 {$mode objfpc}{$H+}
 
+{$I ExceptionLogger.inc}
+
 interface
 
 uses
-  Classes, SysUtils, Contnrs, CustomLineInfo;
+  Classes, SysUtils, Contnrs, {$IFDEF LOG_DWARF}lnfodwrf{$ELSE}CustomLineInfo{$ENDIF};
 
 type
   TStackFrameInfo = class
     Index: Integer;
     LineNumber: Integer;
-    Address: Integer;
+    Address: PtrUInt;
     FunctionClassName: string;
     FunctionName: string;
     Source: string;
@@ -48,7 +50,7 @@ begin
   SourceStr := EmptyStr;
   Func := EmptyStr;
   Success := GetLineInfo(ptruint(Addr), Func, SourceStr, Line);
-  Address := Integer(Addr);
+  Address := PtrUInt(Addr);
   FunctionName := Func;
   if Pos('__', FunctionName) > 0 then begin
     FunctionClassName := Copy(FunctionName, 1, Pos('__', FunctionName) - 1);

@@ -2,17 +2,19 @@ unit UExceptionLogger;
 
 {$mode objfpc}{$H+}
 
+{$I ExceptionLogger.inc}
+
 interface
 
 uses
   Classes
   , SysUtils
   , UStackTrace
-  , CustomLineInfo
+  ,{$IFDEF LOG_DWARF}lnfodwrf{$ELSE}CustomLineInfo{$ENDIF}
   , Forms
   {$if FPC_FULlVERSION>=30002}
   {$ifopt D+}
-  , lineinfo
+  {$IFNDEF LOG_DWARF}, lineinfo{$ENDIF}
   {$ENDIF}
   // enable Debugging - Display line info... (-gl)
   {$endif}
@@ -211,7 +213,7 @@ begin
     if stackFrame.LineNumber = 0 then
       source := EmptyStr;
     rowNo := Format('%0.2d', [stackFrame.Index]);
-    address := IntToHex(stackFrame.Address, 8);
+    address := IntToHex(stackFrame.Address, sizeof(PtrUInt)*2);
     lineNo := EmptyStr;
     if stackFrame.LineNumber > 0 then
       lineNo := Format('(%d)', [stackFrame.LineNumber]);
@@ -257,7 +259,7 @@ end;
 
 procedure TExceptionLogger.HandleException(Sender: TObject; E: Exception);
 begin
-  BackTraceStrFunc := @StabBackTraceStr;
+  BackTraceStrFunc := {$ifdef LOG_DWARF}@DwarfBackTraceStr{$ELSE}@StabBackTraceStr{$ENDIF};
   FStackTrace.GetExceptionBackTrace;
   FLastException := E;
   FExceptionSender := Sender;
@@ -286,29 +288,34 @@ begin
   if FIgnoreList.IndexOf(FLastException.ClassName) <> -1 then
     Exit;
 
-  if FExceptionSender is TThread then
-    TThread.Synchronize(TThread(FExceptionSender), @PrepareReport)
-  else
-    PrepareReport;
-
-  SaveBugReportToFile;
-
-  with TExceptionForm.Create(Application) do
+  Application.DisableIdleHandler;
   try
-    Logger := Self;
+    if FExceptionSender is TThread then
+      TThread.Synchronize(TThread(FExceptionSender), @PrepareReport)
+    else
+      PrepareReport;
+
+    SaveBugReportToFile;
+
+    with TExceptionForm.Create(Application) do
     try
-      biFormatted := FormatBasicDataReport(FBasicData);
-      SetBasicInfo(biFormatted);
+      Logger := Self;
+      try
+        biFormatted := FormatBasicDataReport(FBasicData);
+        SetBasicInfo(biFormatted);
+      finally
+        biFormatted.free;
+      end;
+      LoadStackTraceToListView(FStackTrace);
+      SetLoggerError(FLoggerLastError);
+      lblErrorText.Caption := FLastException.Message;
+      ShowModal;
     finally
-      biFormatted.free;
+      Free;
     end;
-    LoadStackTraceToListView(FStackTrace);
-    SetLoggerError(FLoggerLastError);
-    lblErrorText.Caption := FLastException.Message;
-    ShowModal;
   finally
-    Free;
-  end;;
+    Application.EnableIdleHandler;
+  end;
 end;
 
 procedure TExceptionLogger.SaveBugReportToFile;

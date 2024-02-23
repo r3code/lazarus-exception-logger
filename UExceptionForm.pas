@@ -135,7 +135,7 @@ begin
       NewItem := Add;
       with NewItem do begin
         Caption := IntToStr(Index);
-        SubItems.Add(IntToHex(Address, 8));
+        SubItems.Add(IntToHex(Address, sizeof(PtrUInt)*2));
         SubItems.Add(IntToStr(LineNumber));
         SubItems.Add(FunctionClassName);
         SubItems.Add(FunctionName);
