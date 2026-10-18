@@ -70,7 +70,7 @@ var
   linestab,             { stab with current line info }
   dirstab,              { stab with current directory info }
   filestab   : tstab;   { stab with current file info }
-  filename: {$ifdef FPC_FULLVERSION >= 30301}ansistring{$else}shortstring{$endif};
+  filename: {$if FPC_FULLVERSION >= 30301}ansistring{$else}shortstring{$endif};
   dbgfn : string;
 
 
